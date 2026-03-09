@@ -20,6 +20,17 @@ Transform articles, documents, and existing PowerPoint files into professional, 
 
 ---
 
+## Execution Flow Summary
+
+The workflow has **two mandatory user interaction points** before generation begins:
+
+1. **Phase 0 Step 2** — Framework selection (Reveal.js / SlideDev / HTML)
+2. **Phase 2 Step 1** — Visual style selection (present 3 preset options via AskUserQuestion, WAIT for response)
+
+After content analysis (Phase 1), you MUST ask the user to choose a visual style before generating any slides. Do NOT auto-select a style and proceed directly to generation.
+
+---
+
 ## Phase 0: Input Detection & Mode Selection
 
 ### Step 1: Detect Input Type
@@ -115,9 +126,11 @@ Section: [H2 heading]
 
 ## Phase 2: Style Discovery & Presentation Architecture
 
-### Step 1: Visual Style Selection (Show, Don't Tell)
+### Step 1: Visual Style Selection — MANDATORY USER INTERACTION
 
-**Do NOT ask abstract questions like "深色还是浅色".** Instead, analyze the article's mood and audience, then present 3 curated style options visually.
+**CRITICAL: You MUST present style options to the user and WAIT for their response before generating any slides.** Do NOT skip this step. Do NOT auto-select a style. This is a required interaction point, not an optional step.
+
+**Do NOT ask abstract questions like "深色还是浅色".** Instead, analyze the article's mood and audience, then present 3 curated style options using AskUserQuestion.
 
 #### Determine the Article's Mood
 
@@ -128,19 +141,23 @@ Section: [H2 heading]
 | Education, process, methodology | Calm (平静/信任) | Pastel Geometry, Swiss Modern, Paper & Ink |
 | Thought leadership, cultural analysis | Inspire (激发思考) | Vintage Editorial, Notebook Tabs, Terminal Green |
 
-#### Present 3 Previews
+#### Present 3 Options via AskUserQuestion
 
-Show the user 3 style options from `references/style-presets.md`, describing each concisely:
+After determining the mood category, use the AskUserQuestion tool to present exactly 3 style options from `references/style-presets.md`. Each option should include the preset name and a short description of its look & feel. Add the recommended one as the first option with "(Recommended)" suffix.
 
-> 根据文章风格，推荐以下 3 种视觉方案：
->
-> **方案 A: Bold Signal** — 深色背景 + 橙色强调卡片，Archivo Black 粗体标题，自信有力
-> **方案 B: Dark Botanical** — 纯黑底 + 暖金色渐变装饰，Cormorant 衬线标题，优雅高级
-> **方案 C: Swiss Modern** — 纯白底 + 红色强调，几何布局，极简精准
->
-> 选哪个？也可以混搭（比如"A的配色 + C的字体"）
+Example (for a business analysis article with "Impress" mood):
 
-If the user says "随便" or "你来选", pick the best match based on mood analysis.
+```
+Question: "根据文章风格，推荐以下视觉方案，选哪个？"
+Options:
+  A: "Bold Signal (Recommended)" — 深色背景 + 橙色强调卡片，Archivo Black 粗体标题，自信有力
+  B: "Dark Botanical" — 纯黑底 + 暖金色渐变装饰，Cormorant 衬线标题，优雅高级
+  C: "Electric Studio" — 黑白高对比 + 蓝色强调，Manrope 字体，科技专业感
+```
+
+The user can also select "Other" to describe their own preferences (e.g., "A的配色 + C的字体" or a completely custom style).
+
+**Only proceed to slide generation AFTER receiving the user's style choice.** If the user says "随便" or "你来选" via the "Other" option, then pick the first recommended option based on mood analysis.
 
 ### Step 2: Determine Animation Mood
 
