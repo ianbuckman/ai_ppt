@@ -1,0 +1,12 @@
+{
+  "name": "ai-ppt",
+  "private": true,
+  "scripts": {
+    "dev:tsmc": "slidev projects/tsmc/slidev/slides.md",
+    "build:tsmc": "slidev build projects/tsmc/slidev/slides.md"
+  },
+  "dependencies": {
+    "@slidev/cli": "latest",
+    "@slidev/theme-seriph": "latest"
+  }
+}
