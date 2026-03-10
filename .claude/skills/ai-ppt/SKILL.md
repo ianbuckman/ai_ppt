@@ -263,7 +263,7 @@ Options:
 Pass the content inventory from Phase 1 to the style sub-skill. It will:
 1. Analyze article mood → recommend 3 presets + 1 custom option
 2. Present style options to the user (MANDATORY wait point)
-3. If user selects "自定义参考风格", guide them through the custom extraction workflow
+3. If user selects "自定义参考风格", guide them through the custom extraction workflow → **generate a style preview HTML** (`style-preview.html`) for the user to see the extracted style applied to sample slides → iterate until the user is satisfied
 4. Determine animation mood
 5. Design slide sequence with rhythm rules
 6. Get user confirmation on the slide plan

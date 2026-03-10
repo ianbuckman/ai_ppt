@@ -76,7 +76,9 @@ Then follow `references/custom-style-guide.md` to:
 2. Identify typography → match to Google Fonts
 3. Identify layout pattern
 4. Map to animation mood
-5. Present extracted preset for user confirmation/adjustment
+5. Determine spacing & density
+6. **Generate a style preview HTML** (`style-preview.html`) — a self-contained page with 5 sample slides (cover, stat, content list, quote, two-column) that apply the extracted style so the user can see the actual visual effect in their browser
+7. Present extracted preset summary **with the preview file path** for user confirmation/adjustment — if the user requests changes, update the preset and **regenerate the preview**
 
 ### Step 2: Determine Animation Mood
 
