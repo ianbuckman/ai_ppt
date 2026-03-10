@@ -433,33 +433,17 @@ Apply the extracted animation mood to override the default reveal animations:
 
 ## User Confirmation (with Preview)
 
-After generating the preview HTML, present the extracted style summary to the user **along with the preview file path**:
+After generating the preview HTML, **do NOT ask the user to manually open it**. Instead, proceed to **SKILL.md Step 1c** which will:
 
-```
-从参考素材中提取了以下风格：
+1. **Auto-open** `style-preview.html` in the browser via `xdg-open` / `open`
+2. **Also auto-open** the 3 mood-matching preset previews from `references/previews/` for side-by-side comparison
+3. Present the extracted style summary alongside the preset alternatives
+4. Ask the user to choose between their custom style and the preset options
 
-🎨 配色方案：
-  背景: [--bg-primary] / 文字: [--text-primary] / 强调: [--accent]
-
-📝 字体搭配：
-  标题: [Display font] / 正文: [Body font]
-
-📐 布局风格：[Layout pattern name] — [1句描述]
-
-🎬 动画情绪：[Mood name] — [特点描述]
-
-📄 风格预览已生成：[project-dir]/style-preview.html
-   请在浏览器中打开查看实际效果。
-
-满意吗？需要调整哪里？（比如换个强调色、换套字体等）
-```
-
-If the user requests adjustments:
+If the user requests adjustments to the custom style:
 1. Update the extracted preset values
 2. **Regenerate the preview HTML** with the updated values
-3. Present the updated summary and preview path again
-
-Allow the user to fine-tune individual elements (e.g., "强调色换成红色", "字体用更现代的") before finalizing. Each adjustment should produce an updated preview.
+3. **Re-open** in browser and ask again
 
 ---
 

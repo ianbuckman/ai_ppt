@@ -78,7 +78,100 @@ Then follow `references/custom-style-guide.md` to:
 4. Map to animation mood
 5. Determine spacing & density
 6. **Generate a style preview HTML** (`style-preview.html`) — a self-contained page with 5 sample slides (cover, stat, content list, quote, two-column) that apply the extracted style so the user can see the actual visual effect in their browser
-7. Present extracted preset summary **with the preview file path** for user confirmation/adjustment — if the user requests changes, update the preset and **regenerate the preview**
+7. **Do NOT present for confirmation yet** — proceed to Step 1c for side-by-side comparison
+
+### Step 1c: Auto-Open Previews in Browser & Final Selection
+
+**CRITICAL: After the green-box flow completes (Step 1 or Step 1b), ALWAYS auto-open preview HTMLs in the browser for visual comparison before confirming the style choice.**
+
+#### Preset Name → Preview File Mapping
+
+| Preset | File |
+|--------|------|
+| Bold Signal | `references/previews/01-bold-signal.html` |
+| Electric Studio | `references/previews/02-electric-studio.html` |
+| Creative Voltage | `references/previews/03-creative-voltage.html` |
+| Dark Botanical | `references/previews/04-dark-botanical.html` |
+| Notebook Tabs | `references/previews/05-notebook-tabs.html` |
+| Pastel Geometry | `references/previews/06-pastel-geometry.html` |
+| Split Pastel | `references/previews/07-split-pastel.html` |
+| Vintage Editorial | `references/previews/08-vintage-editorial.html` |
+| Neon Cyber | `references/previews/09-neon-cyber.html` |
+| Terminal Green | `references/previews/10-terminal-green.html` |
+| Swiss Modern | `references/previews/11-swiss-modern.html` |
+| Paper & Ink | `references/previews/12-paper-ink.html` |
+
+#### Path A: User chose a preset (A/B/C)
+
+Open the 3 recommended preset preview HTMLs in the browser:
+
+```bash
+# Open all 3 preset previews — use the absolute path based on this skill's location
+# Replace [SKILL_DIR] with the resolved absolute path to this skill's directory
+open "[SKILL_DIR]/references/previews/[preset-1-file].html"
+open "[SKILL_DIR]/references/previews/[preset-2-file].html"
+open "[SKILL_DIR]/references/previews/[preset-3-file].html"
+```
+
+Then use AskUserQuestion:
+
+```
+Question: "已在浏览器中打开 3 个预设风格预览，请切换标签页对比查看，选择你最喜欢的："
+Options:
+  A: "[Preset 1]"
+  B: "[Preset 2]"
+  C: "[Preset 3]"
+```
+
+#### Path B: User chose custom style (D)
+
+After Step 1b generates `style-preview.html`, open it **plus** the 3 mood-matching preset previews for comparison:
+
+```bash
+# Open custom preview first
+open "[PROJECT_DIR]/style-preview.html"
+
+# Then open the 3 mood-matching preset previews as comparison
+open "[SKILL_DIR]/references/previews/[matching-preset-1].html"
+open "[SKILL_DIR]/references/previews/[matching-preset-2].html"
+open "[SKILL_DIR]/references/previews/[matching-preset-3].html"
+```
+
+Then present the extracted style summary and use AskUserQuestion:
+
+```
+从参考素材中提取了以下风格：
+🎨 配色：[--bg-primary] / [--accent]
+📝 字体：[Display font] + [Body font]
+📐 布局：[Layout pattern]
+🎬 动画：[Mood name]
+
+已在浏览器中打开自定义风格预览和 3 个相近的预设风格，请对比查看：
+
+Question: "选择最终风格："
+Options:
+  A: "自定义风格 (刚提取的)" — 基于你提供的参考素材
+  B: "[Matching Preset 1]" — [1-sentence description]
+  C: "[Matching Preset 2]" — [1-sentence description]
+  D: "[Matching Preset 3]" — [1-sentence description]
+```
+
+If the user selects "Other" to request adjustments (e.g., "自定义风格但换个强调色"), update the preset, regenerate `style-preview.html`, re-open in browser, and ask again.
+
+#### Browser Open Command
+
+Use the Bash tool with `open` (macOS) or `xdg-open` (Linux) to open preview files. Detect the platform and use the appropriate command:
+
+```bash
+# Detect platform and open
+if command -v xdg-open &>/dev/null; then
+  xdg-open "$FILE_PATH"
+elif command -v open &>/dev/null; then
+  open "$FILE_PATH"
+fi
+```
+
+Open all preview files in parallel (one Bash call per file) so they open as separate browser tabs simultaneously.
 
 ### Step 2: Determine Animation Mood
 
