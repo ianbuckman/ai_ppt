@@ -22,12 +22,13 @@ Transform articles, documents, and existing PowerPoint files into professional, 
 
 ## Execution Flow Summary
 
-The workflow has **two mandatory user interaction points** before generation begins:
+The workflow has **two mandatory + one conditional user interaction points** before generation begins:
 
 1. **Phase 0 Step 2** — Framework selection (Reveal.js / SlideDev / HTML)
-2. **Phase 2 Step 1** — Visual style selection (present 3 preset options via AskUserQuestion, WAIT for response)
+2. **Phase 1.5 Step 3** — *(conditional)* Image recommendations — only triggered when the source content contains zero images. Ask the user if they want to provide images for slides that would benefit from visuals.
+3. **Phase 2 Step 1** — Visual style selection (present 3 preset options via AskUserQuestion, WAIT for response)
 
-After content analysis (Phase 1), you MUST ask the user to choose a visual style before generating any slides. Do NOT auto-select a style and proceed directly to generation.
+After content analysis (Phase 1), if the source has images, audit them (keep/adapt/drop). If the source has no images, recommend image opportunities and ask the user. Then proceed to style selection. Do NOT auto-select a style and proceed directly to generation.
 
 ---
 
@@ -100,7 +101,40 @@ Go through the article paragraph by paragraph and tag each content unit with its
 | `transition` | Bridge between sections | "回到开头的问题" |
 | `evidence` | Supporting proof for a claim | 三星良率数据 vs 台积电良率数据 |
 
-### Step 3: Extract Key Elements
+### Step 3: Image Audit
+
+Scan the source content for all images (`![](...)`, `<img>`, or embedded media). For each image found:
+
+1. **Read the image** using the Read tool to understand its visual content
+2. **Classify** the image into one of these categories:
+
+| Category | Description | Slide Suitability |
+|----------|-------------|-------------------|
+| `chart` | Data visualization, graph, pie chart | High — use on stat or comparison slides |
+| `diagram` | Flowchart, architecture, process | High — use on diagram or concept slides |
+| `screenshot` | UI, product, app interface | Medium — use if relevant to the narrative, crop/resize for slide |
+| `photo` | People, places, real-world scenes | Medium — use as background or on story/evidence slides |
+| `decorative` | Stock art, generic illustration, clip art | Low — usually omit, presentation has its own visual system |
+| `logo` | Brand mark, icon | Low — only keep if directly relevant (e.g., company being discussed) |
+| `text-heavy` | Scanned document, dense table screenshot, infographic with small text | Low — unreadable at slide scale, extract the data instead |
+
+3. **Decide** for each image:
+   - **Keep** — assign it to a specific slide and specify placement (background, inline, side-by-side)
+   - **Adapt** — the data is useful but the image format isn't suitable for slides; extract key info and recreate as a slide element (e.g., turn a complex table screenshot into a clean comparison slide)
+   - **Drop** — the image adds no value to the presentation (decorative, redundant, or unreadable at slide scale)
+
+4. **Build an image inventory**:
+
+```
+Images found: N
+  ✓ Keep: [filename] → Slide N ([slide type], [placement])
+  ↻ Adapt: [filename] → Extract [what] for Slide N
+  ✗ Drop: [filename] — Reason: [decorative/redundant/unreadable]
+```
+
+If the source content contains **zero images**, flag this for Phase 1.5 (Image Recommendations). Proceed to Step 4.
+
+### Step 4: Extract Key Elements
 
 Pull out and list:
 - **Key data points**: All numbers, percentages, dollar amounts
@@ -109,9 +143,9 @@ Pull out and list:
 - **Comparisons**: Any side-by-side contrasts
 - **The central thesis**: The one sentence that captures the entire article
 
-### Step 4: Build Content Inventory
+### Step 5: Build Content Inventory
 
-Create a structured inventory:
+Create a structured inventory (include image assignments from Step 3):
 
 ```
 Section: [H2 heading]
@@ -119,8 +153,72 @@ Section: [H2 heading]
   Content units:
     - [type]: [brief description]
     - [type]: [brief description]
+  Images: [filename → placement] (if any)
   Best slide types: [from slide-type-catalog.md]
 ```
+
+---
+
+## Phase 1.5: Image Recommendations (When Source Has No Images)
+
+**Trigger**: Phase 1 Step 3 found zero images in the source content.
+
+**Purpose**: Identify slides that would benefit significantly from visual content, and suggest specific images the user could add.
+
+This phase is NOT about adding generic stock photos to every slide. Most slides work well with typography, color, and layout alone (that's what the style presets are for). Only recommend images where they would **meaningfully enhance comprehension or impact**.
+
+### Step 1: Identify High-Value Image Opportunities
+
+Review the slide sequence and flag slides where an image would deliver clear value:
+
+| Slide Scenario | Why Image Helps | Suggested Image Type |
+|---------------|-----------------|---------------------|
+| Discussing a specific product/company | Audience needs a visual anchor | Product photo or logo |
+| Before/after or physical comparison | Words alone can't convey the difference | Side-by-side photos |
+| Geographic or spatial argument | Locations matter to the story | Map or satellite view |
+| Describing a physical process | Abstract text → concrete visual | Process photo or diagram |
+| Person quoted or profiled | Humanizes the narrative | Headshot or candid photo |
+| Data without context | Number needs scale reference | Contextual photo (e.g., "the size of 3 football fields") |
+
+Do NOT recommend images for:
+- Thesis/statement slides (typography IS the visual)
+- Section dividers (style preset handles these)
+- Data/stat slides (the number IS the visual)
+- Abstract concepts that would require generic stock photos
+
+### Step 2: Generate Recommendations
+
+Build a concise recommendation list:
+
+```
+📷 建议补充以下图片以增强演示效果：
+
+1. Slide N [slide title] — [specific image description]
+   用途：[background / inline / side-by-side]
+   建议来源：[user's own photo / screenshot / specific search term]
+
+2. Slide N [slide title] — [specific image description]
+   ...
+
+其余幻灯片通过排版和配色已有足够视觉表现力，无需额外图片。
+如果没有合适的图片也完全没问题，我会用纯排版方案生成。
+```
+
+### Step 3: Ask User
+
+Present the recommendations via AskUserQuestion:
+
+```
+Question: "文章中没有图片。以下幻灯片加上图片会更好，要提供图片吗？"
+Options:
+  A: "我来提供图片" — 用户将提供图片文件或 URL
+  B: "不需要图片，直接生成" — 用纯排版方案，跳过图片
+  C: "部分采纳" — 用户选择性提供部分图片
+```
+
+- If the user provides images, run Phase 1 Step 3 (Image Audit) on the provided images and integrate them into the slide sequence
+- If the user declines, proceed with pure typography-driven slides (no placeholder or stock images)
+- **NEVER insert placeholder images or unsplash/pexels URLs on your own** — only use images the user explicitly provides
 
 ---
 
@@ -259,6 +357,15 @@ project-name/
 
 **Reference**: Load and follow `references/slidev-syntax.md` for exact syntax.
 
+### Image Placement (SlideDev)
+
+When images were kept in the Phase 1 image audit:
+
+- **Background image**: Use per-slide frontmatter `background: "/path/to/image.jpg"` with `data-background-opacity` for dimming
+- **Side-by-side with text**: Use `layout: image-right` with `image: "/path/to/image.jpg"`
+- **Inline image**: Use standard Markdown `![alt](path)` with sizing classes (e.g., `<img src="path" class="w-80 mx-auto" />`)
+- **Image storage**: Place images in a `public/` folder so SlideDev can serve them
+
 ### Theme + Style Preset Integration
 
 The SlideDev theme provides base layout. Style preset provides custom colors and typography:
@@ -321,6 +428,15 @@ When the user chooses Reveal.js, generate a single `index.html` file.
 
 **Reference**: Load and follow `references/revealjs-syntax.md` for exact syntax.
 
+### Image Placement (Reveal.js)
+
+When images were kept in the Phase 1 image audit:
+
+- **Background image**: `<section data-background-image="path" data-background-size="cover" data-background-opacity="0.3">`
+- **Side-by-side with text**: Use `.r-hstack` or CSS grid with `<img>` + text column
+- **Inline image**: `<img src="path" style="max-height: 60vh; object-fit: contain;" />`
+- **Image storage**: Place images alongside the HTML file or use relative paths
+
 ### Style Preset Integration
 
 Override Reveal.js theme variables with the selected preset:
@@ -370,6 +486,15 @@ When the user chooses pure HTML, generate a single self-contained HTML file with
 8. **Use `.reveal` class** on elements for entrance animations triggered by Intersection Observer
 9. **Stagger child animations** via `transition-delay` on nth-child
 10. **Respect `prefers-reduced-motion`** media query
+
+### Image Placement (Pure HTML)
+
+When images were kept in the Phase 1 image audit:
+
+- **Background image**: `style="background-image: url('path'); background-size: cover; background-position: center;"` on the `<section>` element, with a semi-transparent overlay `<div>` for text readability
+- **Side-by-side with text**: Use `.two-cols` layout with `<img>` in one column
+- **Inline image**: `<img src="path" style="max-height: 55vh; width: auto; object-fit: contain; border-radius: 8px;" />`
+- **Image storage**: Place images alongside the HTML file; use relative paths; do NOT base64-encode large images inline
 
 ### Slide Type Implementation
 
@@ -506,6 +631,13 @@ Before delivering the final output, verify every item:
 - [ ] Font sizes are large enough for projection
 - [ ] Design feels distinctive, not generic "AI slop"
 
+### Images
+- [ ] All kept images are properly sized and positioned for slide scale (not overflowing, not tiny)
+- [ ] No placeholder images or stock photo URLs were inserted without user consent
+- [ ] Text-heavy source images were adapted (data extracted into clean slide elements) rather than embedded as-is
+- [ ] Decorative/redundant images from the source were dropped, not blindly included
+- [ ] If user provided images after recommendation, they are integrated into the correct slides with proper placement
+
 ### Framework-Specific
 - [ ] SlideDev: `npm run dev` works without errors
 - [ ] SlideDev: All layouts are valid built-in layouts
@@ -549,6 +681,24 @@ This is the central reference table. Use it when deciding which slide type to us
 | `transition` | Transition | Section Divider | `section` | Background gradient + centered text | Gradient bg + centered |
 | `evidence` | Story/Evidence | Comparison Table | `default` or `two-cols` | Fragments revealing proof points | `.reveal` staggered |
 
+### Image-Enhanced Slide Types
+
+When images are available (from audit or user-provided), these slide types benefit most:
+
+| Slide Type | Image Usage | Placement |
+|-----------|------------|-----------|
+| Cover | Hero image as background (dimmed) | `background-image` with 0.2-0.4 opacity overlay |
+| Two-Column | Photo/screenshot on one side, text on the other | `image-right` layout or CSS grid |
+| Story/Evidence | Contextual photo supporting the narrative | Inline, below heading |
+| Quote | Portrait of the quoted person | Small circular image next to attribution |
+| Analogy | Visual representation of the "Y" in "X is like Y" | Inline or side-by-side |
+
+Slide types that should generally NOT have images:
+- **Thesis/Statement** — typography is the visual
+- **Single Stat** — the number is the visual
+- **Section Divider** — style preset handles the visual
+- **Transition** — breathing room, keep clean
+
 ### Slide Type Details
 
 For complete implementation details of each slide type (purpose, content limits, concrete code examples for all three frameworks), load `references/slide-type-catalog.md` and `references/html-template.md`.
@@ -561,7 +711,7 @@ Load the appropriate reference files before generating:
 
 | File | Purpose | When to Load |
 |------|---------|-------------|
-| `references/slide-type-catalog.md` | 15 slide types with SlideDev/Reveal.js code | Always |
+| `references/slide-type-catalog.md` | 15 slide types with SlideDev/Reveal.js code | Always (includes image placement guidance) |
 | `references/style-presets.md` | 12 visual style presets | During Phase 2 style selection |
 | `references/animation-patterns.md` | 6 emotion-driven animation categories | During Phase 2 & generation |
 | `references/slidev-syntax.md` | SlideDev syntax reference | When generating SlideDev |
@@ -594,3 +744,7 @@ Load the appropriate reference files before generating:
 9. **Match animation to mood.** A financial analysis shouldn't bounce; a creative pitch shouldn't use corporate 0.2s fades. See `references/animation-patterns.md`.
 
 10. **Distinctive over generic.** Every presentation should feel custom-crafted. Use the curated presets from `references/style-presets.md` instead of framework defaults.
+
+11. **Audit images, don't blindly include.** Read every image in the source to understand its content. Drop decorative/redundant images. Adapt text-heavy screenshots into clean slide elements. Only keep images that genuinely enhance comprehension.
+
+12. **Recommend images thoughtfully, not generically.** When source has no images, only suggest visuals for slides where they would meaningfully help (product photos, comparison visuals, maps, portraits). Most slides work fine with typography and color alone. Never insert placeholder images or stock photo URLs.
