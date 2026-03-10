@@ -39,9 +39,11 @@ This skill orchestrates 5 specialized sub-skills:
 ```
 Phase 0: Input Detection & Framework Selection (this skill)
     ↓
-Phase 1: Deep Content Analysis (this skill)
+Phase 1: Deep Content Analysis + Image Audit (this skill)
     ↓
 [If .pptx input] → Load ai-ppt-extract → extract content → return here
+    ↓
+[If no images] → Phase 1.5: Image Recommendations (this skill, conditional)
     ↓
 Phase 2: Load ai-ppt-style → style selection + slide architecture
     ↓
@@ -53,9 +55,12 @@ Phase 3: Load framework sub-skill based on user choice:
 Phase 4: Quality Checklist & Delivery (this skill)
 ```
 
-**Two mandatory user interaction points:**
+**Two mandatory + one conditional user interaction points:**
 1. **Phase 0 Step 2** — Framework selection
-2. **Phase 2 Step 1** — Visual style selection (handled by ai-ppt-style)
+2. **Phase 1.5 Step 3** — *(conditional)* Image recommendations — only triggered when the source content contains zero images. Ask the user if they want to provide images for slides that would benefit from visuals.
+3. **Phase 2 Step 1** — Visual style selection (handled by ai-ppt-style)
+
+After content analysis (Phase 1), if the source has images, audit them (keep/adapt/drop). If the source has no images, recommend image opportunities and ask the user. Then proceed to style selection. Do NOT auto-select a style and proceed directly to generation.
 
 ---
 
@@ -131,7 +136,40 @@ Go through the article paragraph by paragraph and tag each unit:
 | `transition` | Bridge between sections | "回到开头的问题" |
 | `evidence` | Supporting proof for a claim | 三星良率数据 vs 台积电良率数据 |
 
-### Step 3: Extract Key Elements
+### Step 3: Image Audit
+
+Scan the source content for all images (`![](...)`, `<img>`, or embedded media). For each image found:
+
+1. **Read the image** using the Read tool to understand its visual content
+2. **Classify** the image into one of these categories:
+
+| Category | Description | Slide Suitability |
+|----------|-------------|-------------------|
+| `chart` | Data visualization, graph, pie chart | High — use on stat or comparison slides |
+| `diagram` | Flowchart, architecture, process | High — use on diagram or concept slides |
+| `screenshot` | UI, product, app interface | Medium — use if relevant to the narrative, crop/resize for slide |
+| `photo` | People, places, real-world scenes | Medium — use as background or on story/evidence slides |
+| `decorative` | Stock art, generic illustration, clip art | Low — usually omit, presentation has its own visual system |
+| `logo` | Brand mark, icon | Low — only keep if directly relevant (e.g., company being discussed) |
+| `text-heavy` | Scanned document, dense table screenshot, infographic with small text | Low — unreadable at slide scale, extract the data instead |
+
+3. **Decide** for each image:
+   - **Keep** — assign it to a specific slide and specify placement (background, inline, side-by-side)
+   - **Adapt** — the data is useful but the image format isn't suitable for slides; extract key info and recreate as a slide element (e.g., turn a complex table screenshot into a clean comparison slide)
+   - **Drop** — the image adds no value to the presentation (decorative, redundant, or unreadable at slide scale)
+
+4. **Build an image inventory**:
+
+```
+Images found: N
+  ✓ Keep: [filename] → Slide N ([slide type], [placement])
+  ↻ Adapt: [filename] → Extract [what] for Slide N
+  ✗ Drop: [filename] — Reason: [decorative/redundant/unreadable]
+```
+
+If the source content contains **zero images**, flag this for Phase 1.5 (Image Recommendations). Proceed to Step 4.
+
+### Step 4: Extract Key Elements
 
 Pull out and list:
 - **Key data points**: All numbers, percentages, dollar amounts
@@ -140,7 +178,9 @@ Pull out and list:
 - **Comparisons**: Any side-by-side contrasts
 - **The central thesis**: The one sentence that captures the entire article
 
-### Step 4: Build Content Inventory
+### Step 5: Build Content Inventory
+
+Create a structured inventory (include image assignments from Step 3):
 
 ```
 Section: [H2 heading]
@@ -148,8 +188,72 @@ Section: [H2 heading]
   Content units:
     - [type]: [brief description]
     - [type]: [brief description]
+  Images: [filename → placement] (if any)
   Best slide types: [from slide-type-catalog.md]
 ```
+
+---
+
+## Phase 1.5: Image Recommendations (When Source Has No Images)
+
+**Trigger**: Phase 1 Step 3 found zero images in the source content.
+
+**Purpose**: Identify slides that would benefit significantly from visual content, and suggest specific images the user could add.
+
+This phase is NOT about adding generic stock photos to every slide. Most slides work well with typography, color, and layout alone (that's what the style presets are for). Only recommend images where they would **meaningfully enhance comprehension or impact**.
+
+### Step 1: Identify High-Value Image Opportunities
+
+Review the slide sequence and flag slides where an image would deliver clear value:
+
+| Slide Scenario | Why Image Helps | Suggested Image Type |
+|---------------|-----------------|---------------------|
+| Discussing a specific product/company | Audience needs a visual anchor | Product photo or logo |
+| Before/after or physical comparison | Words alone can't convey the difference | Side-by-side photos |
+| Geographic or spatial argument | Locations matter to the story | Map or satellite view |
+| Describing a physical process | Abstract text → concrete visual | Process photo or diagram |
+| Person quoted or profiled | Humanizes the narrative | Headshot or candid photo |
+| Data without context | Number needs scale reference | Contextual photo (e.g., "the size of 3 football fields") |
+
+Do NOT recommend images for:
+- Thesis/statement slides (typography IS the visual)
+- Section dividers (style preset handles these)
+- Data/stat slides (the number IS the visual)
+- Abstract concepts that would require generic stock photos
+
+### Step 2: Generate Recommendations
+
+Build a concise recommendation list:
+
+```
+📷 建议补充以下图片以增强演示效果：
+
+1. Slide N [slide title] — [specific image description]
+   用途：[background / inline / side-by-side]
+   建议来源：[user's own photo / screenshot / specific search term]
+
+2. Slide N [slide title] — [specific image description]
+   ...
+
+其余幻灯片通过排版和配色已有足够视觉表现力，无需额外图片。
+如果没有合适的图片也完全没问题，我会用纯排版方案生成。
+```
+
+### Step 3: Ask User
+
+Present the recommendations via AskUserQuestion:
+
+```
+Question: "文章中没有图片。以下幻灯片加上图片会更好，要提供图片吗？"
+Options:
+  A: "我来提供图片" — 用户将提供图片文件或 URL
+  B: "不需要图片，直接生成" — 用纯排版方案，跳过图片
+  C: "部分采纳" — 用户选择性提供部分图片
+```
+
+- If the user provides images, run Phase 1 Step 3 (Image Audit) on the provided images and integrate them into the slide sequence
+- If the user declines, proceed with pure typography-driven slides (no placeholder or stock images)
+- **NEVER insert placeholder images or unsplash/pexels URLs on your own** — only use images the user explicitly provides
 
 ---
 
@@ -178,7 +282,7 @@ Based on the user's framework choice from Phase 0, **load and follow** the corre
 | 纯 HTML | **`.claude/skills/ai-ppt-html/SKILL.md`** |
 
 Pass to the framework sub-skill:
-- The content inventory (Phase 1)
+- The content inventory (Phase 1), including image inventory
 - The chosen style preset with CSS variables, fonts, layout signature (Phase 2)
 - The animation mood (Phase 2)
 - The confirmed slide sequence (Phase 2)
@@ -211,6 +315,13 @@ Before delivering the final output, verify every item:
 - [ ] Animations match the mood
 - [ ] Color contrast is sufficient for readability
 - [ ] Design feels distinctive, not generic
+
+### Images
+- [ ] All kept images are properly sized and positioned for slide scale (not overflowing, not tiny)
+- [ ] No placeholder images or stock photo URLs were inserted without user consent
+- [ ] Text-heavy source images were adapted (data extracted into clean slide elements) rather than embedded as-is
+- [ ] Decorative/redundant images from the source were dropped, not blindly included
+- [ ] If user provided images after recommendation, they are integrated into the correct slides with proper placement
 
 ### Framework-Specific
 - [ ] SlideDev: `npm run dev` works without errors; layouts are valid
@@ -251,6 +362,24 @@ Central reference table for deciding which slide type to use for each content un
 | `transition` | Transition | Section Divider | `section` | Gradient bg + centered | Gradient bg |
 | `evidence` | Story/Evidence | Comparison Table | `default` / `two-cols` | Fragments | `.reveal` staggered |
 
+### Image-Enhanced Slide Types
+
+When images are available (from audit or user-provided), these slide types benefit most:
+
+| Slide Type | Image Usage | Placement |
+|-----------|------------|-----------|
+| Cover | Hero image as background (dimmed) | `background-image` with 0.2-0.4 opacity overlay |
+| Two-Column | Photo/screenshot on one side, text on the other | `image-right` layout or CSS grid |
+| Story/Evidence | Contextual photo supporting the narrative | Inline, below heading |
+| Quote | Portrait of the quoted person | Small circular image next to attribution |
+| Analogy | Visual representation of the "Y" in "X is like Y" | Inline or side-by-side |
+
+Slide types that should generally NOT have images:
+- **Thesis/Statement** — typography is the visual
+- **Single Stat** — the number is the visual
+- **Section Divider** — style preset handles the visual
+- **Transition** — breathing room, keep clean
+
 For complete slide type implementation details, load `references/slide-type-catalog.md`.
 
 ---
@@ -275,20 +404,33 @@ Key rules:
 
 | File | Purpose | When to Load |
 |------|---------|-------------|
-| `references/slide-type-catalog.md` | 15 slide types with code examples | Always — needed for content mapping |
+| `references/slide-type-catalog.md` | 15 slide types with code examples (includes image placement guidance) | Always — needed for content mapping |
 | `references/chinese-typography.md` | CJK typography rules | When source is Chinese |
 
 ---
 
 ## Important Reminders
 
-1. **Always analyze before generating.** Never skip Phase 1.
-2. **Respect the article's logic.** Follow the article's argumentative structure, not a generic template.
-3. **Less is more.** Aim for ~1 slide per 150-250 Chinese chars. Err on fewer, more impactful slides.
-4. **Data slides should be dramatic.** Give impressive numbers a full slide with giant font.
-5. **The "so what" test.** Every slide should have a clear takeaway.
-6. **Don't convert paragraphs into bullet points.** Extract the key message; find the right slide type.
-7. **Load sub-skill references before generating.** Each sub-skill lists its required references.
-8. **Show style, don't ask abstractly.** Present visual previews based on article mood.
-9. **Match animation to mood.** Financial analysis shouldn't bounce; creative pitches shouldn't use corporate fades.
-10. **Distinctive over generic.** Use curated presets instead of framework defaults.
+1. **Always analyze before generating.** Never skip Phase 1. The temptation to jump straight to slide generation produces mediocre results.
+
+2. **Respect the article's logic.** The presentation should follow the article's argumentative structure, not impose a generic template. If the article builds an argument in 5 steps, the presentation should too.
+
+3. **Less is more.** A 3000-character article does NOT need 50 slides. Aim for the slide count formula (1 per 150-250 Chinese chars) and err on the side of fewer, more impactful slides.
+
+4. **Data slides should be dramatic.** When a number is impressive, give it a full slide with a giant font. Don't bury "71% market share" in a bullet list.
+
+5. **The "so what" test.** For every slide, ask: "If the audience remembers only this slide, what do they take away?" If you can't answer, the slide needs redesign.
+
+6. **Don't convert paragraphs into bullet points.** This is the #1 mistake in article-to-PPT conversion. Instead, extract the key message and find the right slide type for it.
+
+7. **Load sub-skill references before generating.** Each sub-skill lists its required references. These contain exact, tested code patterns.
+
+8. **Show style, don't ask abstractly.** Present 3 visual previews based on article mood. Never ask "深色还是浅色?" without context.
+
+9. **Match animation to mood.** A financial analysis shouldn't bounce; a creative pitch shouldn't use corporate 0.2s fades.
+
+10. **Distinctive over generic.** Every presentation should feel custom-crafted. Use the curated presets instead of framework defaults.
+
+11. **Audit images, don't blindly include.** Read every image in the source to understand its content. Drop decorative/redundant images. Adapt text-heavy screenshots into clean slide elements. Only keep images that genuinely enhance comprehension.
+
+12. **Recommend images thoughtfully, not generically.** When source has no images, only suggest visuals for slides where they would meaningfully help (product photos, comparison visuals, maps, portraits). Most slides work fine with typography and color alone. Never insert placeholder images or stock photo URLs.

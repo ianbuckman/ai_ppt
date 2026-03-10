@@ -39,6 +39,15 @@ Each slide is a `<section class="slide">` with a `.slide-content` container:
 </section>
 ```
 
+## Image Placement (Pure HTML)
+
+When images were kept in the Phase 1 image audit:
+
+- **Background image**: `style="background-image: url('path'); background-size: cover; background-position: center;"` on the `<section>` element, with a semi-transparent overlay `<div>` for text readability
+- **Side-by-side with text**: Use `.two-cols` layout with `<img>` in one column
+- **Inline image**: `<img src="path" style="max-height: 55vh; width: auto; object-fit: contain; border-radius: 8px;" />`
+- **Image storage**: Place images alongside the HTML file; use relative paths; do NOT base64-encode large images inline
+
 ## Content Density Hard Limits
 
 These are **maximum** values — exceeding any requires splitting into multiple slides:

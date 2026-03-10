@@ -43,6 +43,15 @@ Override Reveal.js theme variables with the selected preset:
 }
 ```
 
+## Image Placement (Reveal.js)
+
+When images were kept in the Phase 1 image audit:
+
+- **Background image**: `<section data-background-image="path" data-background-size="cover" data-background-opacity="0.3">`
+- **Side-by-side with text**: Use `.r-hstack` or CSS grid with `<img>` + text column
+- **Inline image**: `<img src="path" style="max-height: 60vh; object-fit: contain;" />`
+- **Image storage**: Place images alongside the HTML file or use relative paths
+
 ## Content Type → Reveal.js Pattern Mapping
 
 | Content Type | Reveal.js Pattern | Notes |

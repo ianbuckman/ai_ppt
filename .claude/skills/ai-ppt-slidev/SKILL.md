@@ -86,6 +86,15 @@ Plus a global `<style>` block applying preset colors:
 </style>
 ```
 
+## Image Placement (SlideDev)
+
+When images were kept in the Phase 1 image audit:
+
+- **Background image**: Use per-slide frontmatter `background: "/path/to/image.jpg"` with `data-background-opacity` for dimming
+- **Side-by-side with text**: Use `layout: image-right` with `image: "/path/to/image.jpg"`
+- **Inline image**: Use standard Markdown `![alt](path)` with sizing classes (e.g., `<img src="path" class="w-80 mx-auto" />`)
+- **Image storage**: Place images in a `public/` folder so SlideDev can serve them
+
 ## Content Type → SlideDev Layout Mapping
 
 | Content Type | SlideDev Layout | Notes |
