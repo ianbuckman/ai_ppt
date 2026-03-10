@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>风格预览 — Paper & Ink</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600&family=Source+Serif+4:wght@400;600&family=Noto+Serif+SC:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: #faf9f7;
+      --bg-secondary: #f0ede8;
+      --text-primary: #1a1a1a;
+      --text-secondary: #555555;
+      --accent: #c41e3a;
+      --accent-glow: rgba(196, 30, 58, 0.15);
+
+      --font-display: "Cormorant Garamond", "Noto Serif SC", serif;
+      --font-body: "Source Serif 4", "Noto Serif SC", serif;
+
+      --title-size: clamp(2rem, 6vw, 5rem);
+      --h2-size: clamp(1.5rem, 4vw, 3rem);
+      --h3-size: clamp(1.1rem, 2.5vw, 1.75rem);
+      --body-size: clamp(0.8rem, 1.5vw, 1.125rem);
+      --small-size: clamp(0.65rem, 1vw, 0.875rem);
+
+      --slide-padding: clamp(2rem, 6vw, 7rem);
+      --content-gap: clamp(0.5rem, 2vw, 2rem);
+
+      --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+      --duration-normal: 1s;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { height: 100%; overflow-x: hidden; }
+    html { scroll-snap-type: y mandatory; scroll-behavior: smooth; }
+
+    body {
+      background-color: var(--bg-primary);
+      color: var(--text-primary);
+      font-family: var(--font-body);
+      font-size: var(--body-size);
+      line-height: 2;
+      letter-spacing: 0.03em;
+    }
+
+    .slide {
+      width: 100vw; height: 100vh; height: 100dvh;
+      overflow: hidden; scroll-snap-align: start;
+      display: flex; flex-direction: column; position: relative;
+    }
+
+    .slide-content {
+      flex: 1; display: flex; flex-direction: column;
+      justify-content: center; align-items: center; text-align: center;
+      max-height: 100%; overflow: hidden; padding: var(--slide-padding);
+    }
+    .slide-content.left-align { align-items: flex-start; text-align: left; }
+
+    h1 { font-family: var(--font-display); font-size: var(--title-size); font-weight: 600; letter-spacing: 0.04em; line-height: 1.2; }
+    h2 { font-family: var(--font-display); font-size: var(--h2-size); font-weight: 600; letter-spacing: 0.04em; margin-bottom: var(--content-gap); }
+    h3 { font-family: var(--font-display); font-size: var(--h3-size); font-weight: 600; }
+    p  { font-size: var(--body-size); color: var(--text-secondary); line-height: 2; max-width: 650px; }
+    em { font-style: normal; font-weight: 600; color: var(--accent); }
+
+    /* Calm: gentle, slow fades */
+    .reveal {
+      opacity: 0; transform: translateY(10px);
+      transition: opacity var(--duration-normal) ease-in-out,
+                  transform var(--duration-normal) ease-in-out;
+    }
+    .slide.visible .reveal { opacity: 1; transform: translateY(0); }
+    .reveal:nth-child(1) { transition-delay: 0.1s; }
+    .reveal:nth-child(2) { transition-delay: 0.3s; }
+    .reveal:nth-child(3) { transition-delay: 0.5s; }
+    .reveal:nth-child(4) { transition-delay: 0.7s; }
+
+    /* ===== Layout Signature: Drop caps + pull quotes + elegant HR ===== */
+    .drop-cap::first-letter {
+      font-family: var(--font-display);
+      font-size: 3.5em; font-weight: 600; color: var(--accent);
+      float: left; line-height: 0.8; margin-right: 0.1em; margin-top: 0.05em;
+    }
+
+    .elegant-hr {
+      width: 80px; height: 1px; background: var(--accent);
+      margin: 1.5rem auto; opacity: 0.5; border: none;
+    }
+
+    .pull-quote {
+      font-family: var(--font-display);
+      font-size: var(--h2-size); font-weight: 400; font-style: italic;
+      color: var(--text-primary); text-align: center; max-width: 650px;
+      line-height: 1.5; padding: 1em 0;
+      border-top: 1px solid rgba(196, 30, 58, 0.2);
+      border-bottom: 1px solid rgba(196, 30, 58, 0.2);
+    }
+
+    .big-number {
+      font-family: var(--font-display); font-size: clamp(4rem, 15vw, 10rem);
+      font-weight: 600; color: var(--accent); line-height: 1;
+    }
+
+    blockquote {
+      font-family: var(--font-display);
+      font-size: var(--h2-size); font-style: italic;
+      border-left: none; padding: 0; text-align: center; max-width: 650px; line-height: 1.5;
+      color: var(--text-primary);
+    }
+    .attribution { text-align: center; opacity: 0.5; font-size: var(--small-size); margin-top: 0.8em; font-style: normal; font-family: var(--font-body); }
+
+    .two-cols { display: flex; gap: clamp(2rem, 4vw, 4rem); width: 100%; max-width: 800px; }
+    .two-cols > div { flex: 1; text-align: left; }
+
+    ul { text-align: left; max-width: 650px; list-style: none; }
+    ul li { padding: 0.4em 0; border-bottom: 1px solid rgba(0,0,0,0.06); }
+    ul li::before { content: "—"; color: var(--accent); margin-right: 0.5em; }
+
+    .progress-bar {
+      position: fixed; top: 0; left: 0; height: 2px;
+      background: var(--accent);
+      width: 0%; z-index: 1000; transition: width 0.3s ease;
+    }
+
+    .preview-badge {
+      position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%);
+      background: var(--accent); color: #fff;
+      padding: 0.4rem 1.2rem; border-radius: 2rem;
+      font-size: var(--small-size); font-weight: 600; z-index: 1000;
+      opacity: 0.85; pointer-events: none; font-family: var(--font-body);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.2s !important; }
+      html { scroll-behavior: auto; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="progress-bar"></div>
+  <div class="preview-badge">Paper & Ink · 风格预览</div>
+
+  <!-- Slide 1: Cover -->
+  <section class="slide">
+    <div class="slide-content">
+      <h1 class="reveal">演示文稿标题</h1>
+      <hr class="elegant-hr reveal">
+      <p class="reveal">Editorial · Literary · Thoughtful — 纸墨书香风格</p>
+    </div>
+  </section>
+
+  <!-- Slide 2: Stat -->
+  <section class="slide" style="background: var(--bg-secondary);">
+    <div class="slide-content">
+      <div class="big-number reveal">42%</div>
+      <hr class="elegant-hr reveal">
+      <p class="reveal" style="font-size: var(--h3-size);">关键数据展示效果</p>
+    </div>
+  </section>
+
+  <!-- Slide 3: Content with drop cap -->
+  <section class="slide">
+    <div class="slide-content left-align">
+      <h2 class="reveal">内容排版预览</h2>
+      <ul>
+        <li class="reveal">第一个要点 — 展示<em>强调色</em>效果</li>
+        <li class="reveal">第二个要点 — 展示正文字体和行间距</li>
+        <li class="reveal">第三个要点 — 展示列表项的前缀装饰</li>
+      </ul>
+      <p class="reveal drop-cap" style="margin-top: 1.5em; max-width: 550px;">
+        这是一段示例正文，展示首字下沉效果。优秀的排版让内容更易阅读，也让演示文稿更具专业感。
+      </p>
+    </div>
+  </section>
+
+  <!-- Slide 4: Quote as pull-quote -->
+  <section class="slide" style="background: var(--bg-secondary);">
+    <div class="slide-content">
+      <div class="pull-quote reveal">"好的设计是尽可能少的设计。"</div>
+      <p class="attribution reveal">— Dieter Rams</p>
+    </div>
+  </section>
+
+  <!-- Slide 5: Two-Column -->
+  <section class="slide">
+    <div class="slide-content">
+      <h2 class="reveal">对比布局预览</h2>
+      <hr class="elegant-hr reveal">
+      <div class="two-cols reveal">
+        <div>
+          <h3 style="color: var(--accent);">方案 A</h3>
+          <ul><li>优势一</li><li>优势二</li></ul>
+        </div>
+        <div>
+          <h3 style="color: var(--text-secondary);">方案 B</h3>
+          <ul><li>优势一</li><li>优势二</li></ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    const slides = document.querySelectorAll('.slide');
+    let current = 0;
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          current = Array.from(slides).indexOf(entry.target);
+          document.querySelector('.progress-bar').style.width = ((current + 1) / slides.length * 100) + '%';
+        }
+      });
+    }, { threshold: 0.5 });
+    slides.forEach(s => observer.observe(s));
+    let lastScroll = 0;
+    const go = (dir) => { current = Math.max(0, Math.min(slides.length - 1, current + dir)); slides[current].scrollIntoView({ behavior: 'smooth' }); };
+    document.addEventListener('keydown', (e) => {
+      if (['ArrowRight', ' ', 'PageDown'].includes(e.key)) { e.preventDefault(); go(1); }
+      if (['ArrowLeft', 'PageUp'].includes(e.key)) { e.preventDefault(); go(-1); }
+    });
+    document.addEventListener('wheel', (e) => { e.preventDefault(); const now = Date.now(); if (now - lastScroll < 800) return; lastScroll = now; go(e.deltaY > 0 ? 1 : -1); }, { passive: false });
+  </script>
+</body>
+</html>

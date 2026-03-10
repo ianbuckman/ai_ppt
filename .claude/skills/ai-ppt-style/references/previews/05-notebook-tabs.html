@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>风格预览 — Notebook Tabs</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:wght@400;700&family=DM+Sans:wght@400;500&family=Noto+Sans+SC:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-outer: #2d2d2d;
+      --bg-page: #f8f6f1;
+      --text-primary: #1a1a1a;
+      --text-secondary: #666666;
+      --accent: #98d4bb;
+      --accent-glow: rgba(152, 212, 187, 0.3);
+      --tab-1: #98d4bb;
+      --tab-2: #c7b8ea;
+      --tab-3: #f4b8c5;
+      --tab-4: #a8d8ea;
+      --tab-5: #ffe6a7;
+
+      --font-display: "Bodoni Moda", "Noto Serif SC", serif;
+      --font-body: "DM Sans", "Noto Sans SC", sans-serif;
+
+      --title-size: clamp(1.5rem, 5vw, 4rem);
+      --h2-size: clamp(1.25rem, 3.5vw, 2.5rem);
+      --h3-size: clamp(1rem, 2.5vw, 1.75rem);
+      --body-size: clamp(0.75rem, 1.5vw, 1.125rem);
+      --small-size: clamp(0.65rem, 1vw, 0.875rem);
+
+      --slide-padding: clamp(1rem, 4vw, 4rem);
+      --content-gap: clamp(0.5rem, 2vw, 2rem);
+
+      --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+      --duration-normal: 0.8s;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { height: 100%; overflow-x: hidden; }
+    html { scroll-snap-type: y mandatory; scroll-behavior: smooth; }
+
+    body {
+      background-color: var(--bg-outer);
+      color: var(--text-primary);
+      font-family: var(--font-body);
+      font-size: var(--body-size);
+      line-height: 1.8;
+      letter-spacing: 0.05em;
+    }
+
+    .slide {
+      width: 100vw; height: 100vh; height: 100dvh;
+      overflow: hidden; scroll-snap-align: start;
+      display: flex; justify-content: center; align-items: center;
+      position: relative; padding: clamp(1rem, 3vw, 3rem);
+    }
+
+    /* ===== Layout Signature: Paper card on dark bg with tabs ===== */
+    .page-card {
+      background: var(--bg-page);
+      border-radius: 8px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+      width: 100%; max-width: 900px; height: 85%;
+      display: flex; flex-direction: column;
+      justify-content: center; align-items: center; text-align: center;
+      padding: var(--slide-padding);
+      position: relative; overflow: hidden;
+    }
+    .page-card.left-align { align-items: flex-start; text-align: left; }
+
+    /* Section tabs on right edge */
+    .tab-strip {
+      position: absolute; right: 0; top: 50%; transform: translateY(-50%);
+      display: flex; flex-direction: column; gap: 4px;
+    }
+    .tab {
+      width: 24px; border-radius: 0 6px 6px 0;
+      cursor: pointer; transition: width 0.3s ease;
+    }
+    .tab:hover { width: 32px; }
+    .tab-1 { height: 40px; background: var(--tab-1); }
+    .tab-2 { height: 55px; background: var(--tab-2); }
+    .tab-3 { height: 45px; background: var(--tab-3); }
+    .tab-4 { height: 50px; background: var(--tab-4); }
+    .tab-5 { height: 35px; background: var(--tab-5); }
+    .tab.active { width: 36px; }
+
+    h1 { font-family: var(--font-display); font-size: var(--title-size); font-weight: 700; letter-spacing: 0.08em; line-height: 1.3; color: var(--text-primary); }
+    h2 { font-family: var(--font-display); font-size: var(--h2-size); font-weight: 700; letter-spacing: 0.08em; margin-bottom: var(--content-gap); color: var(--text-primary); }
+    h3 { font-family: var(--font-display); font-size: var(--h3-size); font-weight: 700; color: var(--text-primary); }
+    p  { font-size: var(--body-size); color: var(--text-secondary); line-height: 1.8; max-width: 700px; }
+    em { font-style: normal; font-weight: 700; color: #5a7c6a; }
+
+    /* Editorial: staggered reveals */
+    .reveal {
+      opacity: 0; transform: translateY(20px);
+      transition: opacity var(--duration-normal) var(--ease-out-expo),
+                  transform var(--duration-normal) var(--ease-out-expo);
+    }
+    .slide.visible .reveal { opacity: 1; transform: translateY(0); }
+    .reveal:nth-child(1) { transition-delay: 0s; }
+    .reveal:nth-child(2) { transition-delay: 0.15s; }
+    .reveal:nth-child(3) { transition-delay: 0.3s; }
+    .reveal:nth-child(4) { transition-delay: 0.45s; }
+    .reveal:nth-child(5) { transition-delay: 0.6s; }
+
+    .big-number {
+      font-family: var(--font-display); font-size: clamp(4rem, 15vw, 10rem);
+      font-weight: 700; color: #5a7c6a; line-height: 1;
+    }
+
+    blockquote {
+      font-family: var(--font-display);
+      font-size: var(--h3-size); font-style: italic;
+      border-left: 4px solid var(--tab-2);
+      padding: 0.5em 1em; text-align: left; max-width: 700px; line-height: 1.8;
+      color: var(--text-primary);
+    }
+    .attribution { text-align: right; opacity: 0.6; font-size: var(--small-size); margin-top: 1em; font-family: var(--font-body); font-style: normal; }
+
+    .two-cols { display: flex; gap: clamp(1rem, 3vw, 3rem); width: 100%; max-width: 800px; }
+    .two-cols > div { flex: 1; text-align: left; }
+
+    ul { text-align: left; max-width: 700px; list-style: none; }
+    ul li { padding: 0.3em 0; color: var(--text-primary); }
+    ul li::before { content: "—"; color: var(--tab-1); margin-right: 0.5em; }
+
+    .progress-bar {
+      position: fixed; top: 0; left: 0; height: 4px;
+      background: linear-gradient(90deg, var(--tab-1), var(--tab-2), var(--tab-3));
+      width: 0%; z-index: 1000; transition: width 0.3s ease;
+    }
+
+    .preview-badge {
+      position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%);
+      background: var(--tab-2); color: var(--text-primary);
+      padding: 0.4rem 1.2rem; border-radius: 2rem;
+      font-size: var(--small-size); font-weight: 600; z-index: 1000;
+      opacity: 0.85; pointer-events: none;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.2s !important; }
+      html { scroll-behavior: auto; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="progress-bar"></div>
+  <div class="preview-badge">Notebook Tabs · 风格预览</div>
+
+  <!-- Slide 1: Cover -->
+  <section class="slide">
+    <div class="page-card">
+      <div class="tab-strip"><div class="tab tab-1 active"></div><div class="tab tab-2"></div><div class="tab tab-3"></div><div class="tab tab-4"></div><div class="tab tab-5"></div></div>
+      <h1 class="reveal">演示文稿标题</h1>
+      <p class="reveal" style="margin-top: 1em;">Editorial · Organized · Elegant — 笔记本风格</p>
+    </div>
+  </section>
+
+  <!-- Slide 2: Stat -->
+  <section class="slide">
+    <div class="page-card">
+      <div class="tab-strip"><div class="tab tab-1"></div><div class="tab tab-2 active"></div><div class="tab tab-3"></div><div class="tab tab-4"></div><div class="tab tab-5"></div></div>
+      <div class="big-number reveal">42%</div>
+      <p class="reveal" style="font-size: var(--h3-size);">关键数据展示效果</p>
+    </div>
+  </section>
+
+  <!-- Slide 3: Content -->
+  <section class="slide">
+    <div class="page-card left-align">
+      <div class="tab-strip"><div class="tab tab-1"></div><div class="tab tab-2"></div><div class="tab tab-3 active"></div><div class="tab tab-4"></div><div class="tab tab-5"></div></div>
+      <h2 class="reveal">内容排版预览</h2>
+      <ul>
+        <li class="reveal">第一个要点 — 展示<em>强调色</em>效果</li>
+        <li class="reveal">第二个要点 — 展示正文字体和行间距</li>
+        <li class="reveal">第三个要点 — 展示列表项的前缀装饰</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- Slide 4: Quote -->
+  <section class="slide">
+    <div class="page-card">
+      <div class="tab-strip"><div class="tab tab-1"></div><div class="tab tab-2"></div><div class="tab tab-3"></div><div class="tab tab-4 active"></div><div class="tab tab-5"></div></div>
+      <blockquote class="reveal">"好的设计是尽可能少的设计。"</blockquote>
+      <p class="attribution reveal">— Dieter Rams</p>
+    </div>
+  </section>
+
+  <!-- Slide 5: Two-Column -->
+  <section class="slide">
+    <div class="page-card">
+      <div class="tab-strip"><div class="tab tab-1"></div><div class="tab tab-2"></div><div class="tab tab-3"></div><div class="tab tab-4"></div><div class="tab tab-5 active"></div></div>
+      <h2 class="reveal">对比布局预览</h2>
+      <div class="two-cols reveal">
+        <div>
+          <h3 style="color: #5a7c6a;">方案 A</h3>
+          <ul><li>优势一</li><li>优势二</li></ul>
+        </div>
+        <div>
+          <h3 style="color: var(--tab-2);">方案 B</h3>
+          <ul style="color: var(--text-secondary);"><li>优势一</li><li>优势二</li></ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    const slides = document.querySelectorAll('.slide');
+    let current = 0;
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          current = Array.from(slides).indexOf(entry.target);
+          document.querySelector('.progress-bar').style.width = ((current + 1) / slides.length * 100) + '%';
+        }
+      });
+    }, { threshold: 0.5 });
+    slides.forEach(s => observer.observe(s));
+    let lastScroll = 0;
+    const go = (dir) => { current = Math.max(0, Math.min(slides.length - 1, current + dir)); slides[current].scrollIntoView({ behavior: 'smooth' }); };
+    document.addEventListener('keydown', (e) => {
+      if (['ArrowRight', ' ', 'PageDown'].includes(e.key)) { e.preventDefault(); go(1); }
+      if (['ArrowLeft', 'PageUp'].includes(e.key)) { e.preventDefault(); go(-1); }
+    });
+    document.addEventListener('wheel', (e) => { e.preventDefault(); const now = Date.now(); if (now - lastScroll < 800) return; lastScroll = now; go(e.deltaY > 0 ? 1 : -1); }, { passive: false });
+  </script>
+</body>
+</html>

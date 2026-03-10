@@ -149,5 +149,6 @@ After this sub-skill completes, the main orchestrator has:
 | File | Purpose | When to Load |
 |------|---------|-------------|
 | `references/style-presets.md` | 12 curated visual style presets | Always — needed for presenting options |
+| `references/previews/*.html` | Live HTML previews for all 12 presets | When user wants to preview a preset — point them to the file path |
 | `references/animation-patterns.md` | 6 emotion-driven animation categories | After style selection — for mood mapping |
 | `references/custom-style-guide.md` | Guide for extracting style from reference materials | Only when user selects "自定义参考风格" |

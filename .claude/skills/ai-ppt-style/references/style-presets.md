@@ -12,6 +12,27 @@
 2. User selects one (or mixes elements)
 3. Apply the preset's CSS variables, fonts, and layout patterns to the chosen framework
 
+### Preview Files
+
+Each preset has a self-contained HTML preview in `references/previews/`. These can be opened directly in the browser to see the style applied to 5 sample slides (cover, stat, content list, quote, two-column).
+
+| Preset | Preview File |
+|--------|-------------|
+| Bold Signal | `previews/01-bold-signal.html` |
+| Electric Studio | `previews/02-electric-studio.html` |
+| Creative Voltage | `previews/03-creative-voltage.html` |
+| Dark Botanical | `previews/04-dark-botanical.html` |
+| Notebook Tabs | `previews/05-notebook-tabs.html` |
+| Pastel Geometry | `previews/06-pastel-geometry.html` |
+| Split Pastel | `previews/07-split-pastel.html` |
+| Vintage Editorial | `previews/08-vintage-editorial.html` |
+| Neon Cyber | `previews/09-neon-cyber.html` |
+| Terminal Green | `previews/10-terminal-green.html` |
+| Swiss Modern | `previews/11-swiss-modern.html` |
+| Paper & Ink | `previews/12-paper-ink.html` |
+
+When the user selects a preset, you may point them to the corresponding preview file for reference. When generating a custom style preview, use these as structural references.
+
 ### Mood → Preset Mapping
 
 | Mood / Audience | Recommended Presets |
