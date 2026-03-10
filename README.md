@@ -30,11 +30,7 @@ make a presentation from this article
 flowchart TD
     Start([用户触发 ai-ppt]) --> P0S1[Phase 0.1: 检测输入类型]
 
-    P0S1 -->|.pptx 文件| Extract["🔧 ai-ppt-extract<br/>提取 PPT 内容"]
-    Extract --> ExtractConfirm{{"💬 确认提取内容<br/>需要调整吗？"}}
-    ExtractConfirm --> P0S2
-
-    P0S1 -->|文章/文本/URL| P0S2
+    P0S1 --> P0S2
 
     P0S2{{"💬 Phase 0.2: 框架选择<br/>Reveal.js / SlideDev / 纯HTML / 帮我选"}}
 
@@ -88,10 +84,8 @@ flowchart TD
     style P2Custom fill:#FFE4B5,stroke:#FF8C00,color:#000
     style P2CustomConfirm fill:#FFE4B5,stroke:#FF8C00,color:#000
     style P2S5 fill:#FFE4B5,stroke:#FF8C00,color:#000
-    style ExtractConfirm fill:#FFE4B5,stroke:#FF8C00,color:#000
     style Iterate fill:#FFE4B5,stroke:#FF8C00,color:#000
 
-    style Extract fill:#E0F0FF,stroke:#4361EE,color:#000
     style P2 fill:#E0F0FF,stroke:#4361EE,color:#000
     style SlideDev fill:#E0F0FF,stroke:#4361EE,color:#000
     style Revealjs fill:#E0F0FF,stroke:#4361EE,color:#000

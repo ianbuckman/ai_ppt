@@ -1,11 +1,11 @@
 ---
 name: ai-ppt
-description: 将文章/文档/PPT 转换为专业演示文稿。支持 SlideDev、Reveal.js 和零依赖纯 HTML 三种框架输出。当用户说"做成PPT""生成演示文稿""把这篇文章做成slides""转成PPT""把PPT转成网页""article to presentation""make a presentation from this article""convert to slides"等时触发。
+description: 将文章/文档转换为专业演示文稿。支持 SlideDev、Reveal.js 和零依赖纯 HTML 三种框架输出。当用户说"做成PPT""生成演示文稿""把这篇文章做成slides""转成PPT""article to presentation""make a presentation from this article""convert to slides"等时触发。
 ---
 
 # AI PPT Skill — Article-to-Presentation Orchestrator
 
-Transform articles, documents, and existing PowerPoint files into professional, well-structured presentations. This is the **main orchestrator** that coordinates specialized sub-skills for style selection, framework-specific generation, and PPT extraction.
+Transform articles and documents into professional, well-structured presentations. This is the **main orchestrator** that coordinates specialized sub-skills for style selection and framework-specific generation.
 
 ## Core Philosophy
 
@@ -71,7 +71,6 @@ After content analysis (Phase 1), if the source has images, audit them (keep/ada
 | Input | Action |
 |-------|--------|
 | File path (.md, .txt, etc.) | Read file → Article-to-PPT mode |
-| File path (.pptx) | **Load and follow `.claude/skills/ai-ppt-extract/SKILL.md`** → PPT Conversion mode |
 | Pasted text | Use directly → Article-to-PPT mode |
 | URL | Fetch page content → Article-to-PPT mode |
 
