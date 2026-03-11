@@ -22,7 +22,7 @@ Transform articles and documents into professional, well-structured presentation
 
 ## Sub-Skill Architecture
 
-This skill orchestrates 5 specialized sub-skills:
+This skill orchestrates 6 specialized sub-skills:
 
 | Sub-Skill | Path | Responsibility |
 |-----------|------|---------------|
@@ -30,6 +30,7 @@ This skill orchestrates 5 specialized sub-skills:
 | **ai-ppt-slidev** | `.claude/skills/ai-ppt-slidev/SKILL.md` | SlideDev (Markdown) presentation generation |
 | **ai-ppt-revealjs** | `.claude/skills/ai-ppt-revealjs/SKILL.md` | Reveal.js (single HTML with CDN) generation |
 | **ai-ppt-html** | `.claude/skills/ai-ppt-html/SKILL.md` | Zero-dependency HTML generation |
+| **ai-ppt-image** | `.claude/skills/ai-ppt-image/SKILL.md` | Image audit, sufficiency analysis, gap recommendations |
 | **ai-ppt-extract** | `.claude/skills/ai-ppt-extract/SKILL.md` | PPTX content extraction |
 
 ---
@@ -39,11 +40,11 @@ This skill orchestrates 5 specialized sub-skills:
 ```
 Phase 0: Input Detection & Framework Selection (this skill)
     ↓
-Phase 1: Deep Content Analysis + Image Audit (this skill)
+Phase 1: Deep Content Analysis (this skill) + Load ai-ppt-image for image audit
     ↓
 [If .pptx input] → Load ai-ppt-extract → extract content → return here
     ↓
-[If no images] → Phase 1.5: Image Recommendations (this skill, conditional)
+[If images insufficient] → ai-ppt-image handles recommendations + user interaction
     ↓
 Phase 2: Load ai-ppt-style → style selection + slide architecture
     ↓
@@ -57,10 +58,10 @@ Phase 4: Quality Checklist & Delivery (this skill)
 
 **Two mandatory + one conditional user interaction points:**
 1. **Phase 0 Step 2** — Framework selection
-2. **Phase 1.5 Step 3** — *(conditional)* Image recommendations — only triggered when the source content contains zero images. Ask the user if they want to provide images for slides that would benefit from visuals.
+2. **Phase 1.5 Step 3** — *(conditional)* Image recommendations — triggered when the Image Sufficiency Analysis (Phase 1 Step 3) returns `partial` or `none`. Present a table of image gaps with priorities, and ask the user if they want to provide additional images. Accounts for images already kept from the source.
 3. **Phase 2 Step 1** — Visual style selection (handled by ai-ppt-style)
 
-After content analysis (Phase 1), if the source has images, audit them (keep/adapt/drop). If the source has no images, recommend image opportunities and ask the user. Then proceed to style selection. Do NOT auto-select a style and proceed directly to generation.
+After content analysis (Phase 1), audit all source images (keep/adapt/drop), then run the Image Sufficiency Analysis. If images are sufficient for the planned slides, proceed directly to style selection. If images are insufficient (`partial` or `none`), trigger Phase 1.5 to recommend additional images with a clear table and ask the user. Then proceed to style selection. Do NOT auto-select a style and proceed directly to generation.
 
 ---
 
@@ -135,38 +136,17 @@ Go through the article paragraph by paragraph and tag each unit:
 | `transition` | Bridge between sections | "回到开头的问题" |
 | `evidence` | Supporting proof for a claim | 三星良率数据 vs 台积电良率数据 |
 
-### Step 3: Image Audit
+### Step 3: Image Audit & Sufficiency Analysis
 
-Scan the source content for all images (`![](...)`, `<img>`, or embedded media). For each image found:
+**Load and follow `.claude/skills/ai-ppt-image/SKILL.md`** for this step.
 
-1. **Read the image** using the Read tool to understand its visual content
-2. **Classify** the image into one of these categories:
+Pass the source content and estimated slide sequence to the image sub-skill. It will:
+1. Audit all source images (classify, keep/adapt/drop)
+2. Run Image Sufficiency Analysis (coverage ratio, category gaps, key slide coverage)
+3. Return a sufficiency verdict: `sufficient`, `partial`, or `none`
+4. If `partial` or `none`: generate a recommendation table with priorities and ask the user via AskUserQuestion
 
-| Category | Description | Slide Suitability |
-|----------|-------------|-------------------|
-| `chart` | Data visualization, graph, pie chart | High — use on stat or comparison slides |
-| `diagram` | Flowchart, architecture, process | High — use on diagram or concept slides |
-| `screenshot` | UI, product, app interface | Medium — use if relevant to the narrative, crop/resize for slide |
-| `photo` | People, places, real-world scenes | Medium — use as background or on story/evidence slides |
-| `decorative` | Stock art, generic illustration, clip art | Low — usually omit, presentation has its own visual system |
-| `logo` | Brand mark, icon | Low — only keep if directly relevant (e.g., company being discussed) |
-| `text-heavy` | Scanned document, dense table screenshot, infographic with small text | Low — unreadable at slide scale, extract the data instead |
-
-3. **Decide** for each image:
-   - **Keep** — assign it to a specific slide and specify placement (background, inline, side-by-side)
-   - **Adapt** — the data is useful but the image format isn't suitable for slides; extract key info and recreate as a slide element (e.g., turn a complex table screenshot into a clean comparison slide)
-   - **Drop** — the image adds no value to the presentation (decorative, redundant, or unreadable at slide scale)
-
-4. **Build an image inventory**:
-
-```
-Images found: N
-  ✓ Keep: [filename] → Slide N ([slide type], [placement])
-  ↻ Adapt: [filename] → Extract [what] for Slide N
-  ✗ Drop: [filename] — Reason: [decorative/redundant/unreadable]
-```
-
-If the source content contains **zero images**, flag this for Phase 1.5 (Image Recommendations). Proceed to Step 4.
+The image sub-skill returns the final image inventory (including any user-provided images) to use in subsequent steps.
 
 ### Step 4: Extract Key Elements
 
@@ -190,69 +170,6 @@ Section: [H2 heading]
   Images: [filename → placement] (if any)
   Best slide types: [from slide-type-catalog.md]
 ```
-
----
-
-## Phase 1.5: Image Recommendations (When Source Has No Images)
-
-**Trigger**: Phase 1 Step 3 found zero images in the source content.
-
-**Purpose**: Identify slides that would benefit significantly from visual content, and suggest specific images the user could add.
-
-This phase is NOT about adding generic stock photos to every slide. Most slides work well with typography, color, and layout alone (that's what the style presets are for). Only recommend images where they would **meaningfully enhance comprehension or impact**.
-
-### Step 1: Identify High-Value Image Opportunities
-
-Review the slide sequence and flag slides where an image would deliver clear value:
-
-| Slide Scenario | Why Image Helps | Suggested Image Type |
-|---------------|-----------------|---------------------|
-| Discussing a specific product/company | Audience needs a visual anchor | Product photo or logo |
-| Before/after or physical comparison | Words alone can't convey the difference | Side-by-side photos |
-| Geographic or spatial argument | Locations matter to the story | Map or satellite view |
-| Describing a physical process | Abstract text → concrete visual | Process photo or diagram |
-| Person quoted or profiled | Humanizes the narrative | Headshot or candid photo |
-| Data without context | Number needs scale reference | Contextual photo (e.g., "the size of 3 football fields") |
-
-Do NOT recommend images for:
-- Thesis/statement slides (typography IS the visual)
-- Section dividers (style preset handles these)
-- Data/stat slides (the number IS the visual)
-- Abstract concepts that would require generic stock photos
-
-### Step 2: Generate Recommendations
-
-Build a concise recommendation list:
-
-```
-📷 建议补充以下图片以增强演示效果：
-
-1. Slide N [slide title] — [specific image description]
-   用途：[background / inline / side-by-side]
-   建议来源：[user's own photo / screenshot / specific search term]
-
-2. Slide N [slide title] — [specific image description]
-   ...
-
-其余幻灯片通过排版和配色已有足够视觉表现力，无需额外图片。
-如果没有合适的图片也完全没问题，我会用纯排版方案生成。
-```
-
-### Step 3: Ask User
-
-Present the recommendations via AskUserQuestion:
-
-```
-Question: "文章中没有图片。以下幻灯片加上图片会更好，要提供图片吗？"
-Options:
-  A: "我来提供图片" — 用户将提供图片文件或 URL
-  B: "不需要图片，直接生成" — 用纯排版方案，跳过图片
-  C: "部分采纳" — 用户选择性提供部分图片
-```
-
-- If the user provides images, run Phase 1 Step 3 (Image Audit) on the provided images and integrate them into the slide sequence
-- If the user declines, proceed with pure typography-driven slides (no placeholder or stock images)
-- **NEVER insert placeholder images or unsplash/pexels URLs on your own** — only use images the user explicitly provides
 
 ---
 
@@ -363,21 +280,7 @@ Central reference table for deciding which slide type to use for each content un
 
 ### Image-Enhanced Slide Types
 
-When images are available (from audit or user-provided), these slide types benefit most:
-
-| Slide Type | Image Usage | Placement |
-|-----------|------------|-----------|
-| Cover | Hero image as background (dimmed) | `background-image` with 0.2-0.4 opacity overlay |
-| Two-Column | Photo/screenshot on one side, text on the other | `image-right` layout or CSS grid |
-| Story/Evidence | Contextual photo supporting the narrative | Inline, below heading |
-| Quote | Portrait of the quoted person | Small circular image next to attribution |
-| Analogy | Visual representation of the "Y" in "X is like Y" | Inline or side-by-side |
-
-Slide types that should generally NOT have images:
-- **Thesis/Statement** — typography is the visual
-- **Single Stat** — the number is the visual
-- **Section Divider** — style preset handles the visual
-- **Transition** — breathing room, keep clean
+See `.claude/skills/ai-ppt-image/SKILL.md` for the full image-enhanced slide types reference table and image placement guidance.
 
 For complete slide type implementation details, load `references/slide-type-catalog.md`.
 
@@ -432,4 +335,4 @@ Key rules:
 
 11. **Audit images, don't blindly include.** Read every image in the source to understand its content. Drop decorative/redundant images. Adapt text-heavy screenshots into clean slide elements. Only keep images that genuinely enhance comprehension.
 
-12. **Recommend images thoughtfully, not generically.** When source has no images, only suggest visuals for slides where they would meaningfully help (product photos, comparison visuals, maps, portraits). Most slides work fine with typography and color alone. Never insert placeholder images or stock photo URLs.
+12. **Recommend images thoughtfully, not generically.** When source images are insufficient (`partial` or `none`), only suggest visuals for slides where they would meaningfully help (product photos, comparison visuals, maps, portraits). Account for images already kept from the source — don't recommend what's already covered. Present gaps as a clear table with priorities. Most slides work fine with typography and color alone. Never insert placeholder images or stock photo URLs.

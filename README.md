@@ -61,17 +61,16 @@ flowchart TD
 
     P1 --> P1S1["Step 1: 解析结构<br/>标题层级 → 章节边界<br/>估算 slide 数量"]
     P1S1 --> P1S2["Step 2: 标注内容单元<br/>thesis / data_point / comparison<br/>quote / narrative / concept..."]
-    P1S2 --> P1S3["Step 3: 图片审计<br/>扫描所有图片 → 分类<br/>Keep / Adapt / Drop"]
-    P1S3 --> P1S4["Step 4: 提取关键要素<br/>数据点 / 金句 / 核心论点"]
+    P1S2 --> P1S3["🔧 ai-ppt-image<br/>Step 3: 图片审计 + 充足性分析<br/>Keep / Adapt / Drop → 覆盖率评估"]
+    P1S3 -->|充足| P1S4
+    P1S3 -->|不足 / 无图片| P15{{"💬 图片建议<br/>表格展示缺口 + 优先级<br/>补充图片 / 用已有 / 部分采纳"}}
+    P15 -->|用户提供图片| P1S3b[审计用户提供的图片<br/>与已有图片合并]
+    P1S3b --> P1S4
+    P15 -->|不补充图片| P1S4
+    P1S4["Step 4: 提取关键要素<br/>数据点 / 金句 / 核心论点"]
     P1S4 --> P1S5[Step 5: 构建内容清单]
 
-    P1S5 --> ImgCheck{源内容有图片吗?}
-
-    ImgCheck -->|有图片| P2
-    ImgCheck -->|无图片| P15{{"💬 Phase 1.5: 图片建议<br/>提供图片 / 不需要 / 部分采纳"}}
-    P15 -->|用户提供图片| P1S3b[重新审计用户提供的图片]
-    P1S3b --> P2
-    P15 -->|不需要图片| P2
+    P1S5 --> P2
 
     P2["🔧 ai-ppt-style<br/>Phase 2: 风格发现"]
     P2 --> P2S1["分析文章情绪<br/>Impress / Excite / Calm / Inspire"]
@@ -119,6 +118,7 @@ flowchart TD
     style P2S5 fill:#FFE4B5,stroke:#FF8C00,color:#000
     style Iterate fill:#FFE4B5,stroke:#FF8C00,color:#000
 
+    style P1S3 fill:#E0F0FF,stroke:#4361EE,color:#000
     style P2 fill:#E0F0FF,stroke:#4361EE,color:#000
     style SlideDev fill:#E0F0FF,stroke:#4361EE,color:#000
     style Revealjs fill:#E0F0FF,stroke:#4361EE,color:#000
@@ -136,7 +136,7 @@ flowchart TD
 | # | 阶段 | 问什么 | 是否必须 |
 |---|------|--------|---------|
 | 1 | Phase 0.2 | 选框架（Reveal.js / SlideDev / HTML / 帮我选） | 必须 |
-| 2 | Phase 1.5 | 文章无图片时，要不要补充图片 | 条件触发 |
+| 2 | Phase 1.5 | 图片不足时，展示缺口表格，要不要补充图片 | 条件触发 |
 | 3 | Phase 2.1 | 选视觉风格（3 预设 + 自定义参考） | 必须 |
 | 4 | Phase 2.1b | 自定义时：提供参考素材方式 | 条件触发 |
 | 5 | Phase 2.1c | 🌐 **浏览器预览** → 对比选择最终风格 | 必须 |
@@ -196,6 +196,8 @@ open projects/tsmc/run_example_1_index.html
 │   └── references/
 │       ├── html-template.md
 │       └── viewport-base.css
+├── ai-ppt-image/                  # 图片审计 + 充足性分析
+│   └── SKILL.md
 └── ai-ppt-extract/                # PPT 内容提取
     ├── SKILL.md
     └── references/
