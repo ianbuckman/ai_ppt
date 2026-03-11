@@ -68,21 +68,16 @@ flowchart TD
 
     P2["🔧 ai-ppt-style<br/>Phase 2: 风格发现"]
     P2 --> P2S1["分析文章情绪<br/>Impress / Excite / Calm / Inspire"]
-    P2S1 --> P2S1a{{"💬 Phase 2.1: 风格选择<br/>3个预设 + 自定义参考风格"}}
+    P2S1 --> P2Preview["🌐 自动打开浏览器<br/>打开 3 个预设风格预览 HTML"]
+    P2Preview --> P2S1a{{"💬 Phase 2.1: 风格选择<br/>3个预设 + 自定义参考风格<br/>（预览已在浏览器中打开）"}}
 
-    P2S1a -->|选择预设| P2Preview
+    P2S1a -->|选择预设 A/B/C| P2S2
     P2S1a -->|自定义参考风格| P2Custom{{"💬 收集参考素材<br/>截图 / HTML·CSS / 文字描述"}}
     P2Custom --> P2Extract["提取视觉 DNA<br/>配色 / 字体 / 布局 / 动画"]
     P2Extract --> P2GenPreview["生成自定义风格预览<br/>style-preview.html"]
-    P2GenPreview --> P2PreviewCustom
-
-    P2Preview["🌐 自动打开浏览器<br/>打开 3 个预设风格预览 HTML"]
-    P2Preview --> P2Pick{{"💬 对比预览，选择最终风格<br/>切换标签页查看"}}
-
-    P2PreviewCustom["🌐 自动打开浏览器<br/>自定义预览 + 3 个相近预设预览"]
+    P2GenPreview --> P2PreviewCustom["🌐 自动打开浏览器<br/>自定义预览 + 3 个相近预设预览"]
     P2PreviewCustom --> P2PickCustom{{"💬 选择最终风格<br/>自定义 / 预设A / 预设B / 预设C"}}
 
-    P2Pick --> P2S2
     P2PickCustom --> P2S2
 
     P2S2[确定动画情绪]
@@ -100,7 +95,6 @@ flowchart TD
     style P15 fill:#FFE4B5,stroke:#FF8C00,color:#000
     style P2S1a fill:#FFE4B5,stroke:#FF8C00,color:#000
     style P2Custom fill:#FFE4B5,stroke:#FF8C00,color:#000
-    style P2Pick fill:#FFE4B5,stroke:#FF8C00,color:#000
     style P2PickCustom fill:#FFE4B5,stroke:#FF8C00,color:#000
     style P2S5 fill:#FFE4B5,stroke:#FF8C00,color:#000
     style Iterate fill:#FFE4B5,stroke:#FF8C00,color:#000
@@ -121,20 +115,17 @@ flowchart TD
 | # | 阶段 | 问什么 | 是否必须 |
 |---|------|--------|---------|
 | 1 | Phase 1.5 | 图片不足时，展示缺口表格，要不要补充图片 | 条件触发 |
-| 2 | Phase 2.1 | 选视觉风格（3 预设 + 自定义参考） | 必须 |
+| 2 | Phase 2.1 | 🌐 **打开预览** + 选视觉风格（3 预设 + 自定义参考），一次完成 | 必须 |
 | 3 | Phase 2.1b | 自定义时：提供参考素材方式 | 条件触发 |
-| 4 | Phase 2.1c | 🌐 **浏览器预览** → 对比选择最终风格 | 必须 |
+| 4 | Phase 2.1c | 自定义时：🌐 打开自定义预览 + 3 个对比预设，选择最终风格 | 条件触发 |
 | 5 | Phase 2.5 | 确认 slide plan 表格 | 必须 |
 | 6 | 交付后 | 需要调整吗？ | 可选 |
 
 ### 风格预览机制
 
-Phase 2.1c 会自动在浏览器中打开预览 HTML 文件：
+Phase 2.1 会先自动在浏览器中打开 3 个推荐预设风格预览 HTML（每个含 5 页示例幻灯片：封面、数据、列表、引言、对比），然后再让用户选择。用户只需选一次，无需二次确认。
 
-- **选预设**：打开 3 个推荐的预设风格预览（每个含 5 页示例幻灯片：封面、数据、列表、引言、对比）
-- **选自定义**：打开自定义风格预览 + 3 个与 mood 匹配的预设预览（共 4 个标签页）
-
-用户在浏览器标签页之间切换对比，然后回到 Claude Code 告诉我选哪个。
+如果用户选择自定义参考风格，Phase 2.1c 会额外打开自定义风格预览 + 3 个相近预设预览（共 4 个标签页），用户对比后选择最终风格。
 
 ## 示例项目
 

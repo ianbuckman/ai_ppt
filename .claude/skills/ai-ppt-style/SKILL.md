@@ -11,7 +11,7 @@ This sub-skill handles visual style selection and presentation architecture desi
 
 Before this sub-skill is called, the orchestrator has completed:
 - **Phase 1: Content Analysis** — structured content inventory with tagged content units, key elements, and section breakdown
-- The user has already selected a framework (SlideDev / Reveal.js / HTML)
+- The framework is Reveal.js (single HTML with CDN)
 
 ## Phase 2: Style Discovery & Presentation Architecture
 
@@ -30,12 +30,24 @@ Before this sub-skill is called, the orchestrator has completed:
 | Education, process, methodology | Calm (平静/信任) | Pastel Geometry, Swiss Modern, Paper & Ink |
 | Thought leadership, cultural analysis | Inspire (激发思考) | Vintage Editorial, Notebook Tabs, Terminal Green |
 
-#### Present 4 Options via AskUserQuestion
+#### Present Options with Browser Previews — Single Selection
 
-After determining the mood category, use AskUserQuestion to present **3 preset options + 1 custom option** from `references/style-presets.md`. Add the recommended one as the first option with "(Recommended)" suffix.
+After determining the mood category, **first open the 3 recommended preset preview HTMLs in the browser**, then use AskUserQuestion to present the options. This way the user sees both the text descriptions and the live previews, and only needs to choose once.
+
+**Step 1: Open preview HTMLs** (use the preset → file mapping table below):
+
+```bash
+# Open all 3 preset previews — use the absolute path based on this skill's location
+# Replace [SKILL_DIR] with the resolved absolute path to this skill's directory
+open "[SKILL_DIR]/references/previews/[preset-1-file].html"
+open "[SKILL_DIR]/references/previews/[preset-2-file].html"
+open "[SKILL_DIR]/references/previews/[preset-3-file].html"
+```
+
+**Step 2: AskUserQuestion** with text descriptions + preview reminder:
 
 ```
-Question: "根据文章风格，推荐以下视觉方案，选哪个？"
+Question: "根据文章风格，推荐以下视觉方案（已在浏览器中打开预览，请切换标签页对比查看）："
 Options:
   A: "[Preset 1] (Recommended)" — [1-sentence visual description]
   B: "[Preset 2]" — [1-sentence visual description]
@@ -55,7 +67,7 @@ Options:
 
 The user can also select "Other" to describe their own preferences (e.g., "A的配色 + C的字体" or a completely custom style).
 
-**Only proceed AFTER receiving the user's style choice.** If the user says "随便" or "你来选" via "Other", then pick the first recommended option.
+**Only proceed AFTER receiving the user's style choice.** If the user says "随便" or "你来选" via "Other", then pick the first recommended option. If the user selects A/B/C, the style is confirmed — proceed directly to Step 2 (Animation Mood). No second selection needed.
 
 ### Step 1b: Custom Reference Style Workflow (when user selects option D)
 
@@ -80,11 +92,7 @@ Then follow `references/custom-style-guide.md` to:
 6. **Generate a style preview HTML** (`style-preview.html`) — a self-contained page with 5 sample slides (cover, stat, content list, quote, two-column) that apply the extracted style so the user can see the actual visual effect in their browser
 7. **Do NOT present for confirmation yet** — proceed to Step 1c for side-by-side comparison
 
-### Step 1c: Auto-Open Previews in Browser & Final Selection
-
-**CRITICAL: After the green-box flow completes (Step 1 or Step 1b), ALWAYS auto-open preview HTMLs in the browser for visual comparison before confirming the style choice.**
-
-#### Preset Name → Preview File Mapping
+### Preset Name → Preview File Mapping
 
 | Preset | File |
 |--------|------|
@@ -101,29 +109,7 @@ Then follow `references/custom-style-guide.md` to:
 | Swiss Modern | `references/previews/11-swiss-modern.html` |
 | Paper & Ink | `references/previews/12-paper-ink.html` |
 
-#### Path A: User chose a preset (A/B/C)
-
-Open the 3 recommended preset preview HTMLs in the browser:
-
-```bash
-# Open all 3 preset previews — use the absolute path based on this skill's location
-# Replace [SKILL_DIR] with the resolved absolute path to this skill's directory
-open "[SKILL_DIR]/references/previews/[preset-1-file].html"
-open "[SKILL_DIR]/references/previews/[preset-2-file].html"
-open "[SKILL_DIR]/references/previews/[preset-3-file].html"
-```
-
-Then use AskUserQuestion:
-
-```
-Question: "已在浏览器中打开 3 个预设风格预览，请切换标签页对比查看，选择你最喜欢的："
-Options:
-  A: "[Preset 1]"
-  B: "[Preset 2]"
-  C: "[Preset 3]"
-```
-
-#### Path B: User chose custom style (D)
+### Step 1c: Custom Style Preview & Final Selection (only when user selects D)
 
 After Step 1b generates `style-preview.html`, open it **plus** the 3 mood-matching preset previews for comparison:
 
@@ -158,7 +144,7 @@ Options:
 
 If the user selects "Other" to request adjustments (e.g., "自定义风格但换个强调色"), update the preset, regenerate `style-preview.html`, re-open in browser, and ask again.
 
-#### Browser Open Command
+### Browser Open Command
 
 Use the Bash tool with `open` (macOS) or `xdg-open` (Linux) to open preview files. Detect the platform and use the appropriate command:
 
