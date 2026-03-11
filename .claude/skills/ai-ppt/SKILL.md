@@ -1,6 +1,6 @@
 ---
 name: ai-ppt
-description: 将文章/文档转换为专业演示文稿。支持 SlideDev、Reveal.js 和零依赖纯 HTML 三种框架输出。当用户说"做成PPT""生成演示文稿""把这篇文章做成slides""转成PPT""article to presentation""make a presentation from this article""convert to slides"等时触发。
+description: 将文章/文档转换为专业演示文稿。使用 Reveal.js 框架输出单文件 HTML。当用户说"做成PPT""生成演示文稿""把这篇文章做成slides""转成PPT""article to presentation""make a presentation from this article""convert to slides"等时触发。
 ---
 
 # AI PPT Skill — Article-to-Presentation Orchestrator
@@ -11,7 +11,7 @@ Transform articles and documents into professional, well-structured presentation
 
 1. **Content-First** — Always analyze the article deeply before designing any slides. The presentation structure should emerge from the content, not be imposed on it.
 2. **One Message Per Slide** — Every slide must have exactly ONE clear takeaway. If you can't state it in one sentence, split the slide.
-3. **Three Framework Options** — SlideDev (technical talks), Reveal.js (general use with CDN), or zero-dependency HTML (maximum portability and visual freedom).
+3. **Reveal.js Output** — Single-file HTML with CDN dependencies, suitable for all presentation scenarios.
 4. **Presentation Rhythm** — Alternate slide types to maintain audience attention. Never three bullet slides in a row. Add breathing room every 4-5 slides.
 5. **Show, Don't Tell** — For style selection, show visual previews rather than asking abstract questions. Let users pick from concrete examples.
 6. **Anti-"AI Slop"** — Use curated style presets with distinctive typography, color, and animation. Avoid generic, template-y aesthetics.
@@ -27,9 +27,7 @@ This skill orchestrates 6 specialized sub-skills:
 | Sub-Skill | Path | Responsibility |
 |-----------|------|---------------|
 | **ai-ppt-style** | `.claude/skills/ai-ppt-style/SKILL.md` | Style discovery, preset/custom style selection, slide sequence design |
-| **ai-ppt-slidev** | `.claude/skills/ai-ppt-slidev/SKILL.md` | SlideDev (Markdown) presentation generation |
 | **ai-ppt-revealjs** | `.claude/skills/ai-ppt-revealjs/SKILL.md` | Reveal.js (single HTML with CDN) generation |
-| **ai-ppt-html** | `.claude/skills/ai-ppt-html/SKILL.md` | Zero-dependency HTML generation |
 | **ai-ppt-image** | `.claude/skills/ai-ppt-image/SKILL.md` | Image audit, sufficiency analysis, gap recommendations |
 | **ai-ppt-extract** | `.claude/skills/ai-ppt-extract/SKILL.md` | PPTX content extraction |
 
@@ -38,7 +36,7 @@ This skill orchestrates 6 specialized sub-skills:
 ## Execution Flow
 
 ```
-Phase 0: Input Detection & Framework Selection (this skill)
+Phase 0: Input Detection (this skill)
     ↓
 Phase 1: Deep Content Analysis (this skill) + Load ai-ppt-image for image audit
     ↓
@@ -48,24 +46,20 @@ Phase 1: Deep Content Analysis (this skill) + Load ai-ppt-image for image audit
     ↓
 Phase 2: Load ai-ppt-style → style selection + slide architecture
     ↓
-Phase 3: Load framework sub-skill based on user choice:
-    → ai-ppt-slidev  (if SlideDev)
-    → ai-ppt-revealjs (if Reveal.js)
-    → ai-ppt-html     (if pure HTML)
+Phase 3: Load ai-ppt-revealjs → generate Reveal.js presentation
     ↓
 Phase 4: Quality Checklist & Delivery (this skill)
 ```
 
-**Two mandatory + one conditional user interaction points:**
-1. **Phase 0 Step 2** — Framework selection
-2. **Phase 1.5 Step 3** — *(conditional)* Image recommendations — triggered when the Image Sufficiency Analysis (Phase 1 Step 3) returns `partial` or `none`. Present a table of image gaps with priorities, and ask the user if they want to provide additional images. Accounts for images already kept from the source.
-3. **Phase 2 Step 1** — Visual style selection (handled by ai-ppt-style)
+**One mandatory + one conditional user interaction points:**
+1. **Phase 1.5 Step 3** — *(conditional)* Image recommendations — triggered when the Image Sufficiency Analysis (Phase 1 Step 3) returns `partial` or `none`. Present a table of image gaps with priorities, and ask the user if they want to provide additional images. Accounts for images already kept from the source.
+2. **Phase 2 Step 1** — Visual style selection (handled by ai-ppt-style)
 
 After content analysis (Phase 1), audit all source images (keep/adapt/drop), then run the Image Sufficiency Analysis. If images are sufficient for the planned slides, proceed directly to style selection. If images are insufficient (`partial` or `none`), trigger Phase 1.5 to recommend additional images with a clear table and ask the user. Then proceed to style selection. Do NOT auto-select a style and proceed directly to generation.
 
 ---
 
-## Phase 0: Input Detection & Mode Selection
+## Phase 0: Input Detection
 
 ### Step 1: Detect Input Type
 
@@ -77,34 +71,7 @@ After content analysis (Phase 1), audit all source images (keep/adapt/drop), the
 
 If no input is provided, ask the user.
 
-### Step 2: Framework Selection
-
-Ask the user via AskUserQuestion:
-
-```
-请选择输出格式：
-A: "Reveal.js (Recommended)" — 单个 HTML 文件，CDN 依赖，直接浏览器打开
-B: "SlideDev" — Markdown 驱动，适合包含代码/图表的技术演讲
-C: "纯 HTML" — 零依赖，单文件，自带导航/动画，最大视觉自由度
-D: "帮我选" — 根据文章内容自动推荐
-```
-
-### Decision Matrix for "帮我选"
-
-| Factor | → Reveal.js | → SlideDev | → 纯 HTML |
-|--------|-------------|------------|-----------|
-| Contains code snippets | | ✓ | |
-| Contains diagrams/flowcharts | | ✓ | |
-| Technical audience | | ✓ | |
-| Quick sharing (email/Slack) | | | ✓ |
-| No internet/Node.js needed | | | ✓ |
-| Maximum visual customization | | | ✓ |
-| Business/general audience | ✓ | | |
-| Speaker notes needed | ✓ | ✓ | |
-| Contains mostly narrative | ✓ | | |
-| Contains data/statistics | ✓ | | |
-
-**Default**: Reveal.js for most cases. Pure HTML when zero-dependency or distinctive visual design is prioritized.
+**Framework**: Always use **Reveal.js** — single HTML file with CDN dependencies, directly opens in browser. No framework selection needed.
 
 ---
 
@@ -189,15 +156,9 @@ Pass the content inventory from Phase 1 to the style sub-skill. It will:
 
 ## Phase 3: Generate Presentation
 
-Based on the user's framework choice from Phase 0, **load and follow** the corresponding sub-skill:
+**Load and follow `.claude/skills/ai-ppt-revealjs/SKILL.md`** to generate the Reveal.js presentation.
 
-| Framework | Sub-Skill to Load |
-|-----------|------------------|
-| SlideDev | **`.claude/skills/ai-ppt-slidev/SKILL.md`** |
-| Reveal.js | **`.claude/skills/ai-ppt-revealjs/SKILL.md`** |
-| 纯 HTML | **`.claude/skills/ai-ppt-html/SKILL.md`** |
-
-Pass to the framework sub-skill:
+Pass to the Reveal.js sub-skill:
 - The content inventory (Phase 1), including image inventory
 - The chosen style preset with CSS variables, fonts, layout signature (Phase 2)
 - The animation mood (Phase 2)
@@ -240,9 +201,7 @@ Before delivering the final output, verify every item:
 - [ ] If user provided images after recommendation, they are integrated into the correct slides with proper placement
 
 ### Framework-Specific
-- [ ] SlideDev: `npm run dev` works without errors; layouts are valid
 - [ ] Reveal.js: HTML is valid; CDN links correct; plugins initialized
-- [ ] Pure HTML: Navigation (keyboard, touch, wheel) works; animations trigger on scroll
 
 ### Speaker Support
 - [ ] Speaker notes for key slides (cover, stats, thesis, closing)
@@ -265,18 +224,18 @@ Before delivering the final output, verify every item:
 
 Central reference table for deciding which slide type to use for each content unit.
 
-| Content Type | Primary Slide Type | Alternative | SlideDev Layout | Reveal.js Pattern | HTML Pattern |
-|-------------|-------------------|-------------|-----------------|-------------------|-------------|
-| `thesis` | Thesis/Statement | Cover (if opening) | `center` / `statement` | Centered `<h2>` + auto-animate | Centered `<h2>` |
-| `data_point` | Single Stat | Bullet List (if minor) | `fact` | Giant `<span>` + `<p>` | `.big-number` + `<p>` |
-| `comparison` | Comparison Table | Two-Column | `two-cols` | `<table>` or `<div>` | `.two-cols` |
-| `quote` | Quote | Highlight | `quote` | `<blockquote>` | `<blockquote>` + `.attribution` |
-| `narrative` | Story/Evidence | Bullet List | `default` + `v-clicks` | Fragments `fade-up` | `.reveal` staggered |
-| `concept` | Thesis/Statement | Diagram | `center` | Centered heading | Centered `<h2>` |
-| `analogy` | Analogy | Two-Column | `two-cols` | `.r-hstack` | `.two-cols` |
-| `list` | Bullet List | Timeline | `default` + `<v-clicks>` | `<ul>` fragments | `<ul>` + `.reveal` |
-| `transition` | Transition | Section Divider | `section` | Gradient bg + centered | Gradient bg |
-| `evidence` | Story/Evidence | Comparison Table | `default` / `two-cols` | Fragments | `.reveal` staggered |
+| Content Type | Primary Slide Type | Alternative | Reveal.js Pattern |
+|-------------|-------------------|-------------|-------------------|
+| `thesis` | Thesis/Statement | Cover (if opening) | Centered `<h2>` + auto-animate |
+| `data_point` | Single Stat | Bullet List (if minor) | Giant `<span>` + `<p>` |
+| `comparison` | Comparison Table | Two-Column | `<table>` or `<div>` |
+| `quote` | Quote | Highlight | `<blockquote>` |
+| `narrative` | Story/Evidence | Bullet List | Fragments `fade-up` |
+| `concept` | Thesis/Statement | Diagram | Centered heading |
+| `analogy` | Analogy | Two-Column | `.r-hstack` |
+| `list` | Bullet List | Timeline | `<ul>` fragments |
+| `transition` | Transition | Section Divider | Gradient bg + centered |
+| `evidence` | Story/Evidence | Comparison Table | Fragments |
 
 ### Image-Enhanced Slide Types
 
