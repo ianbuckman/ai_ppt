@@ -75,5 +75,3 @@
 
 - 每个 SKILL.md 控制在 500 行以内，超出拆到 `references/`
 - 子 skill 不独立触发，只由主 skill 编排调用
-- 新功能需要在 `evals/` 中添加对应的测试 prompt 和 assertions
-- 修 skill 后重跑受影响的 eval case 验证效果
