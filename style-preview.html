@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>风格预览 — Pixel Garden Blue</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400;1,700&family=Space+Mono:wght@400;700&family=Noto+Sans+SC:wght@400;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg-primary: #0044CC;
+      --bg-secondary: #003399;
+      --bg-gradient: linear-gradient(135deg, #0044CC 0%, #003399 50%, #002277 100%);
+      --text-primary: #ffffff;
+      --text-secondary: rgba(255, 255, 255, 0.7);
+      --accent: #FFD700;
+      --accent-glow: rgba(255, 215, 0, 0.3);
+      --accent-red: #FF3333;
+      --grid-color: rgba(255, 255, 255, 0.06);
+
+      --font-display: "Playfair Display", "Noto Sans SC", serif;
+      --font-body: "Space Mono", "Noto Sans SC", monospace;
+
+      --title-size: clamp(1.8rem, 5vw, 4rem);
+      --h2-size: clamp(1.25rem, 3.5vw, 2.5rem);
+      --h3-size: clamp(1rem, 2.5vw, 1.75rem);
+      --body-size: clamp(0.75rem, 1.4vw, 1.05rem);
+      --small-size: clamp(0.65rem, 1vw, 0.875rem);
+
+      --slide-padding: clamp(2rem, 5vw, 5rem);
+      --content-gap: clamp(0.5rem, 2vw, 2rem);
+
+      --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+      --duration-normal: 0.8s;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { height: 100%; overflow-x: hidden; }
+    html { scroll-snap-type: y mandatory; scroll-behavior: smooth; }
+
+    body {
+      background-color: var(--bg-primary);
+      color: var(--text-primary);
+      font-family: var(--font-body);
+      font-size: var(--body-size);
+      line-height: 1.8;
+      letter-spacing: 0.05em;
+    }
+
+    /* ===== Grid Background ===== */
+    .slide::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-size: 60px 60px;
+      background-image:
+        linear-gradient(to right, var(--grid-color) 1px, transparent 1px),
+        linear-gradient(to bottom, var(--grid-color) 1px, transparent 1px);
+      mask-image: radial-gradient(circle at center, black 50%, transparent 90%);
+      -webkit-mask-image: radial-gradient(circle at center, black 50%, transparent 90%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .slide {
+      width: 100vw; height: 100vh; height: 100dvh;
+      overflow: hidden; scroll-snap-align: start;
+      display: flex; flex-direction: column; position: relative;
+      background: var(--bg-gradient);
+    }
+
+    .slide-content {
+      flex: 1; display: flex; flex-direction: column;
+      justify-content: center; align-items: center; text-align: center;
+      max-height: 100%; overflow: hidden; padding: var(--slide-padding);
+      position: relative; z-index: 2;
+    }
+    .slide-content.left-align { align-items: flex-start; text-align: left; }
+
+    h1 {
+      font-family: var(--font-display);
+      font-size: var(--title-size);
+      font-style: italic;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      line-height: 1.3;
+    }
+    h2 {
+      font-family: var(--font-display);
+      font-size: var(--h2-size);
+      font-style: italic;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      margin-bottom: var(--content-gap);
+    }
+    h3 {
+      font-family: var(--font-display);
+      font-size: var(--h3-size);
+      font-style: italic;
+      font-weight: 700;
+    }
+    p {
+      font-family: var(--font-body);
+      font-size: var(--body-size);
+      color: var(--text-secondary);
+      line-height: 1.8;
+      max-width: 800px;
+    }
+    em { font-style: normal; font-weight: 700; color: var(--accent); }
+
+    /* ===== Pixel-Art Decorative Elements ===== */
+    .pixel-flower {
+      position: absolute;
+      pointer-events: none;
+      z-index: 1;
+      image-rendering: pixelated;
+    }
+
+    @keyframes float-slow {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-15px); }
+    }
+    @keyframes float-medium {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    .float-slow { animation: float-slow 6s ease-in-out infinite; }
+    .float-medium { animation: float-medium 5s ease-in-out infinite; }
+    .delay-300 { animation-delay: 300ms; }
+    .delay-700 { animation-delay: 700ms; }
+
+    /* ===== Reveal Animations ===== */
+    .reveal {
+      opacity: 0; transform: translateY(30px);
+      transition: opacity var(--duration-normal) var(--ease-out-expo),
+                  transform var(--duration-normal) var(--ease-out-expo);
+    }
+    .slide.visible .reveal { opacity: 1; transform: translateY(0); }
+    .reveal:nth-child(1) { transition-delay: 0.1s; }
+    .reveal:nth-child(2) { transition-delay: 0.25s; }
+    .reveal:nth-child(3) { transition-delay: 0.4s; }
+    .reveal:nth-child(4) { transition-delay: 0.55s; }
+
+    .big-number {
+      font-family: var(--font-display);
+      font-size: clamp(4rem, 15vw, 10rem);
+      font-weight: 700;
+      font-style: italic;
+      color: var(--accent);
+      line-height: 1;
+      text-shadow: 0 0 40px var(--accent-glow), 0 0 80px rgba(255, 215, 0, 0.15);
+    }
+
+    blockquote {
+      font-family: var(--font-display);
+      font-size: var(--h3-size);
+      font-style: italic;
+      border-left: 4px solid var(--accent);
+      padding: 0.5em 1.2em;
+      text-align: left;
+      max-width: 800px;
+      line-height: 1.8;
+      color: var(--text-primary);
+    }
+    .attribution {
+      text-align: right;
+      opacity: 0.6;
+      font-size: var(--small-size);
+      margin-top: 1em;
+      font-family: var(--font-body);
+    }
+
+    .two-cols {
+      display: flex;
+      gap: clamp(1.5rem, 4vw, 4rem);
+      width: 100%;
+      max-width: 900px;
+    }
+    .two-cols > div {
+      flex: 1;
+      text-align: left;
+      padding: clamp(1rem, 2vw, 2rem);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 4px;
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    ul { text-align: left; max-width: 800px; list-style: none; }
+    ul li {
+      padding: 0.4em 0;
+      font-family: var(--font-body);
+    }
+    ul li::before {
+      content: "//";
+      color: var(--accent);
+      margin-right: 0.6em;
+      font-weight: 700;
+    }
+
+    /* ===== Slide Number ===== */
+    .slide-num {
+      position: absolute;
+      top: clamp(1rem, 2vw, 2rem);
+      right: clamp(1rem, 2vw, 2rem);
+      font-family: var(--font-body);
+      font-size: var(--small-size);
+      opacity: 0.4;
+      z-index: 3;
+      letter-spacing: 0.15em;
+    }
+
+    /* ===== Progress & Badge ===== */
+    .progress-bar {
+      position: fixed; top: 0; left: 0; height: 3px;
+      background: linear-gradient(90deg, var(--accent), var(--accent-red));
+      width: 0%; z-index: 1000; transition: width 0.3s ease;
+    }
+
+    .preview-badge {
+      position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%);
+      background: var(--accent); color: var(--bg-primary);
+      padding: 0.4rem 1.2rem; border-radius: 2rem;
+      font-size: var(--small-size); font-weight: 700; z-index: 1000;
+      opacity: 0.9; pointer-events: none;
+      font-family: var(--font-body);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.2s !important; }
+      html { scroll-behavior: auto; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="progress-bar"></div>
+  <div class="preview-badge">Pixel Garden Blue · 风格预览</div>
+
+  <!-- Slide 1: Cover -->
+  <section class="slide">
+    <!-- Pixel flowers -->
+    <svg class="pixel-flower float-slow" style="top:12%;left:8%;width:32px;height:40px;" viewBox="0 0 12 16">
+      <rect x="4" y="0" width="4" height="4" fill="#FFD700"/>
+      <rect x="4" y="8" width="4" height="4" fill="#FFD700"/>
+      <rect x="0" y="4" width="4" height="4" fill="#FFD700"/>
+      <rect x="8" y="4" width="4" height="4" fill="#FFD700"/>
+      <rect x="4" y="4" width="4" height="4" fill="#8B4513"/>
+      <rect x="4" y="12" width="4" height="4" fill="#228B22"/>
+    </svg>
+    <svg class="pixel-flower float-medium delay-300" style="top:18%;right:12%;width:40px;height:52px;" viewBox="0 0 12 20">
+      <rect x="4" y="0" width="4" height="4" fill="#FF3333"/>
+      <rect x="4" y="8" width="4" height="4" fill="#FF3333"/>
+      <rect x="0" y="4" width="4" height="4" fill="#FF3333"/>
+      <rect x="8" y="4" width="4" height="4" fill="#FF3333"/>
+      <rect x="4" y="4" width="4" height="4" fill="#FFD700"/>
+      <rect x="4" y="12" width="4" height="8" fill="#228B22"/>
+    </svg>
+    <svg class="pixel-flower float-slow delay-700" style="bottom:20%;left:6%;width:28px;height:36px;" viewBox="0 0 12 16">
+      <rect x="4" y="0" width="4" height="4" fill="#FF3333"/>
+      <rect x="4" y="8" width="4" height="4" fill="#FF3333"/>
+      <rect x="0" y="4" width="4" height="4" fill="#FF3333"/>
+      <rect x="8" y="4" width="4" height="4" fill="#FF3333"/>
+      <rect x="4" y="4" width="4" height="4" fill="#FFD700"/>
+      <rect x="4" y="12" width="4" height="4" fill="#228B22"/>
+    </svg>
+    <svg class="pixel-flower float-medium" style="bottom:25%;right:10%;width:24px;height:32px;" viewBox="0 0 12 16">
+      <rect x="4" y="0" width="4" height="4" fill="#FFD700"/>
+      <rect x="4" y="8" width="4" height="4" fill="#FFD700"/>
+      <rect x="0" y="4" width="4" height="4" fill="#FFD700"/>
+      <rect x="8" y="4" width="4" height="4" fill="#FFD700"/>
+      <rect x="4" y="4" width="4" height="4" fill="#8B4513"/>
+      <rect x="4" y="12" width="4" height="4" fill="#228B22"/>
+    </svg>
+    <span class="slide-num">01 / 05</span>
+    <div class="slide-content">
+      <p class="reveal" style="font-size: var(--small-size); letter-spacing: 0.3em; text-transform: uppercase; opacity: 0.5; margin-bottom: 1em;">STYLE PREVIEW · 2026</p>
+      <h1 class="reveal">演示文稿标题</h1>
+      <p class="reveal" style="margin-top: 1em;">Subtitle — 副标题展示效果</p>
+    </div>
+  </section>
+
+  <!-- Slide 2: Single Stat -->
+  <section class="slide">
+    <svg class="pixel-flower float-medium delay-300" style="top:15%;right:15%;width:28px;height:36px;" viewBox="0 0 12 16">
+      <rect x="4" y="0" width="4" height="4" fill="#FFD700"/>
+      <rect x="4" y="8" width="4" height="4" fill="#FFD700"/>
+      <rect x="0" y="4" width="4" height="4" fill="#FFD700"/>
+      <rect x="8" y="4" width="4" height="4" fill="#FFD700"/>
+      <rect x="4" y="4" width="4" height="4" fill="#8B4513"/>
+      <rect x="4" y="12" width="4" height="4" fill="#228B22"/>
+    </svg>
+    <span class="slide-num">02 / 05</span>
+    <div class="slide-content">
+      <div class="big-number reveal">72.7%</div>
+      <p class="reveal" style="font-size: var(--h3-size); color: var(--text-primary); margin-top: 0.5em;">关键数据展示效果</p>
+      <p class="reveal" style="font-size: var(--small-size); opacity: 0.5; margin-top: 0.5em;">复合年增长率 · CAGR 2025–2028</p>
+    </div>
+  </section>
+
+  <!-- Slide 3: Content List -->
+  <section class="slide">
+    <svg class="pixel-flower float-slow" style="bottom:18%;right:8%;width:32px;height:42px;" viewBox="0 0 12 16">
+      <rect x="4" y="0" width="4" height="4" fill="#FF3333"/>
+      <rect x="4" y="8" width="4" height="4" fill="#FF3333"/>
+      <rect x="0" y="4" width="4" height="4" fill="#FF3333"/>
+      <rect x="8" y="4" width="4" height="4" fill="#FF3333"/>
+      <rect x="4" y="4" width="4" height="4" fill="#FFD700"/>
+      <rect x="4" y="12" width="4" height="4" fill="#228B22"/>
+    </svg>
+    <span class="slide-num">03 / 05</span>
+    <div class="slide-content left-align" style="padding-left: clamp(3rem, 8vw, 8rem);">
+      <h2 class="reveal">内容排版预览</h2>
+      <ul>
+        <li class="reveal">第一个要点 — 展示<em>强调色</em>效果</li>
+        <li class="reveal">第二个要点 — 正文字体和行间距</li>
+        <li class="reveal">第三个要点 — 列表项的等宽前缀</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- Slide 4: Quote -->
+  <section class="slide">
+    <svg class="pixel-flower float-medium delay-700" style="top:12%;left:10%;width:24px;height:32px;" viewBox="0 0 12 16">
+      <rect x="4" y="0" width="4" height="4" fill="#FFD700"/>
+      <rect x="4" y="8" width="4" height="4" fill="#FFD700"/>
+      <rect x="0" y="4" width="4" height="4" fill="#FFD700"/>
+      <rect x="8" y="4" width="4" height="4" fill="#FFD700"/>
+      <rect x="4" y="4" width="4" height="4" fill="#8B4513"/>
+      <rect x="4" y="12" width="4" height="4" fill="#228B22"/>
+    </svg>
+    <span class="slide-num">04 / 05</span>
+    <div class="slide-content">
+      <blockquote class="reveal">"当 Agent 搞砸时，是因为没有正确的上下文；当它们成功时，是因为有正确的上下文。"</blockquote>
+      <p class="attribution reveal">— Harrison Chase, LangChain CEO</p>
+    </div>
+  </section>
+
+  <!-- Slide 5: Two-Column -->
+  <section class="slide">
+    <svg class="pixel-flower float-slow delay-300" style="top:10%;right:6%;width:28px;height:36px;" viewBox="0 0 12 16">
+      <rect x="4" y="0" width="4" height="4" fill="#FF3333"/>
+      <rect x="4" y="8" width="4" height="4" fill="#FF3333"/>
+      <rect x="0" y="4" width="4" height="4" fill="#FF3333"/>
+      <rect x="8" y="4" width="4" height="4" fill="#FF3333"/>
+      <rect x="4" y="4" width="4" height="4" fill="#FFD700"/>
+      <rect x="4" y="12" width="4" height="4" fill="#228B22"/>
+    </svg>
+    <span class="slide-num">05 / 05</span>
+    <div class="slide-content">
+      <h2 class="reveal">对比布局预览</h2>
+      <div class="two-cols reveal">
+        <div>
+          <h3 style="color: var(--accent); margin-bottom: 0.5em;">通用 Agent</h3>
+          <ul>
+            <li>强大基础模型</li>
+            <li>可组合工具</li>
+            <li>通用运行时</li>
+          </ul>
+        </div>
+        <div>
+          <h3 style="color: var(--accent-red); margin-bottom: 0.5em;">专业化 Agent</h3>
+          <ul>
+            <li>领域专业知识</li>
+            <li>定制工具链</li>
+            <li>垂直整合</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    const slides = document.querySelectorAll('.slide');
+    let current = 0;
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          current = Array.from(slides).indexOf(entry.target);
+          document.querySelector('.progress-bar').style.width =
+            ((current + 1) / slides.length * 100) + '%';
+        }
+      });
+    }, { threshold: 0.5 });
+    slides.forEach(s => observer.observe(s));
+
+    let lastScroll = 0;
+    const go = (dir) => {
+      current = Math.max(0, Math.min(slides.length - 1, current + dir));
+      slides[current].scrollIntoView({ behavior: 'smooth' });
+    };
+    document.addEventListener('keydown', (e) => {
+      if (['ArrowRight', 'ArrowDown', ' ', 'PageDown'].includes(e.key)) { e.preventDefault(); go(1); }
+      if (['ArrowLeft', 'ArrowUp', 'PageUp'].includes(e.key)) { e.preventDefault(); go(-1); }
+    });
+    document.addEventListener('wheel', (e) => {
+      e.preventDefault();
+      const now = Date.now();
+      if (now - lastScroll < 800) return;
+      lastScroll = now;
+      go(e.deltaY > 0 ? 1 : -1);
+    }, { passive: false });
+  </script>
+</body>
+</html>

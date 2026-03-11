@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>只做代工，凭什么成为全球最重要的公司？</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5/dist/reset.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5/dist/reveal.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5/dist/theme/black.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5/plugin/highlight/monokai.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Mono:wght@400;700&family=Noto+Sans+SC:wght@400;500;700;900&display=swap');
+
+    :root {
+      /* KIWI palette */
+      --bg-dark: #3E4044;
+      --bg-light: #EEEEEE;
+      --text-dark: #111111;
+      --text-light: #FFFFFF;
+      --c-peach: #F6B86B;
+      --c-rose: #D97793;
+      --c-mint: #36C684;
+      --c-lemon: #EFE449;
+      --c-lilac: #A27BC5;
+      --c-blue: #5787D6;
+
+      /* Reveal.js overrides */
+      --r-background-color: #3E4044;
+      --r-main-color: #EEEEEE;
+      --r-heading-color: #FFFFFF;
+      --r-main-font: "Inter", "Noto Sans SC", "PingFang SC", sans-serif;
+      --r-heading-font: "Inter", "Noto Sans SC", "PingFang SC", sans-serif;
+      --r-main-font-size: 36px;
+      --r-heading-line-height: 1.3;
+      --r-block-margin: 20px;
+      --r-link-color: var(--c-blue);
+      --r-selection-background-color: var(--c-lilac);
+
+      /* Animation */
+      --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    /* ===== Global Typography ===== */
+    .reveal {
+      line-height: 1.8;
+      letter-spacing: 0.05em;
+      font-weight: 400;
+    }
+    .reveal h1, .reveal h2, .reveal h3, .reveal h4 {
+      letter-spacing: 0.06em;
+      font-weight: 700;
+      text-shadow: none;
+    }
+    .reveal blockquote {
+      font-style: normal;
+      background: none;
+      box-shadow: none;
+    }
+    .reveal ul li, .reveal ol li {
+      margin-bottom: 0.6em;
+      line-height: 1.8;
+    }
+
+    /* ===== Noise overlay (SVG-based) ===== */
+    .reveal::after {
+      content: '';
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      opacity: 0.06;
+      mix-blend-mode: overlay;
+      pointer-events: none;
+      z-index: 9999;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    }
+
+    /* ===== Section header label (monospace marker) ===== */
+    .section-label {
+      font-family: "Space Mono", monospace;
+      font-size: 0.55em;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      opacity: 0.5;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 1.5em;
+    }
+    .section-label::before {
+      content: '';
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      background: currentColor;
+    }
+
+    /* ===== Mono meta text ===== */
+    .mono {
+      font-family: "Space Mono", monospace;
+      font-size: 0.65em;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    /* ===== Stat slide ===== */
+    .big-number {
+      font-size: clamp(5em, 12vw, 9em);
+      font-weight: 900;
+      line-height: 1;
+      letter-spacing: -0.03em;
+    }
+    .stat-context {
+      font-size: 1.3em;
+      opacity: 0.85;
+      margin-top: 0.4em;
+      font-weight: 500;
+    }
+    .stat-detail {
+      font-size: 0.85em;
+      opacity: 0.45;
+      font-family: "Space Mono", monospace;
+    }
+
+    /* ===== Tag pills ===== */
+    .tag {
+      display: inline-block;
+      border: 1.5px solid currentColor;
+      padding: 4px 14px;
+      font-size: 0.55em;
+      font-family: "Space Mono", monospace;
+      border-radius: 20px;
+      text-transform: uppercase;
+      margin: 4px;
+    }
+
+    /* ===== Two column ===== */
+    .two-cols {
+      display: flex;
+      gap: 2.5em;
+      margin-top: 1em;
+      text-align: left;
+    }
+    .two-cols > div {
+      flex: 1;
+    }
+
+    /* ===== Comparison table ===== */
+    .reveal table {
+      border-collapse: collapse;
+      width: 90%;
+      margin: 1em auto 0;
+      font-size: 0.75em;
+    }
+    .reveal table th {
+      font-family: "Space Mono", monospace;
+      text-transform: uppercase;
+      font-size: 0.85em;
+      letter-spacing: 0.06em;
+      padding: 0.8em;
+      border-bottom: 2px solid var(--text-light);
+    }
+    .reveal table td {
+      padding: 0.7em 0.8em;
+      border-bottom: 1px solid rgba(255,255,255,0.15);
+    }
+    .reveal table .winner {
+      color: var(--c-mint);
+      font-weight: 700;
+    }
+
+    /* ===== Diagram: flywheel ===== */
+    .flywheel {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.6em;
+      flex-wrap: wrap;
+      margin-top: 1.5em;
+    }
+    .flywheel-node {
+      padding: 0.7em 1.4em;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 0.85em;
+      color: var(--text-dark);
+    }
+    .flywheel-arrow {
+      font-size: 1.8em;
+      opacity: 0.5;
+      color: var(--text-light);
+    }
+
+    /* ===== Analogy card ===== */
+    .analogy-card {
+      padding: 1.5em;
+      border-radius: 12px;
+      text-align: left;
+    }
+    .analogy-card h4 {
+      margin-bottom: 0.6em;
+      font-size: 1em;
+    }
+    .analogy-card p {
+      font-size: 0.78em;
+      line-height: 1.7;
+      opacity: 0.9;
+    }
+    .analogy-eq {
+      font-size: 2.5em;
+      opacity: 0.4;
+      align-self: center;
+    }
+
+    /* ===== Highlight slide ===== */
+    .highlight-text {
+      font-size: 1.6em;
+      font-weight: 500;
+      opacity: 0.7;
+      line-height: 1.5;
+    }
+    .highlight-punch {
+      font-size: clamp(2em, 5vw, 3.2em);
+      font-weight: 900;
+      margin-top: 0.2em;
+      line-height: 1.2;
+    }
+
+    /* ===== Footer ===== */
+    .slide-footer {
+      position: absolute;
+      bottom: 1.5em;
+      left: 2em;
+      right: 2em;
+      display: flex;
+      justify-content: space-between;
+      font-family: "Space Mono", monospace;
+      font-size: 0.4em;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      opacity: 0.3;
+    }
+
+    /* ===== Section divider ===== */
+    .divider-num {
+      font-size: clamp(4em, 10vw, 7em);
+      font-weight: 900;
+      opacity: 0.2;
+      line-height: 1;
+      margin-bottom: -0.2em;
+    }
+    .divider-title {
+      font-size: clamp(1.8em, 4vw, 2.8em);
+      font-weight: 700;
+    }
+    .divider-sub {
+      font-size: 0.9em;
+      opacity: 0.6;
+      margin-top: 0.3em;
+      font-weight: 400;
+    }
+
+    /* ===== Closing flywheel summary ===== */
+    .closing-flow {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 0.3em;
+      font-size: 0.9em;
+      font-weight: 700;
+      margin-top: 1em;
+    }
+    .closing-flow span {
+      padding: 0.3em 0.8em;
+      border-radius: 6px;
+    }
+    .closing-sep {
+      opacity: 0.4;
+      font-weight: 400;
+    }
+
+    /* ===== Light background overrides ===== */
+    section[data-background-color="#EEEEEE"] h2,
+    section[data-background-color="#EEEEEE"] h3,
+    section[data-background-color="#EEEEEE"] h4,
+    section[data-background-color="#EEEEEE"] p,
+    section[data-background-color="#EEEEEE"] li,
+    section[data-background-color="#EEEEEE"] td,
+    section[data-background-color="#EEEEEE"] th,
+    section[data-background-color="#EEEEEE"] .section-label,
+    section[data-background-color="#EEEEEE"] .stat-detail,
+    section[data-background-color="#EEEEEE"] .stat-context {
+      color: var(--text-dark);
+    }
+    section[data-background-color="#EEEEEE"] .section-label::before {
+      background: var(--text-dark);
+    }
+    section[data-background-color="#EEEEEE"] table th {
+      border-bottom-color: var(--text-dark);
+    }
+    section[data-background-color="#EEEEEE"] table td {
+      border-bottom-color: rgba(0,0,0,0.12);
+    }
+
+    /* ===== Reduce motion ===== */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.2s !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="reveal">
+    <div class="slides">
+
+      <!-- ==================== SLIDE 1: COVER ==================== -->
+      <section data-background-color="#3E4044">
+        <div class="section-label" style="justify-content:center;">17号野生分析师 · TSMC系列 · 第二篇</div>
+        <h1 style="font-size: clamp(1.6em, 4vw, 2.4em); line-height: 1.3; color: var(--c-peach);">
+          只做代工<br>凭什么成为全球最重要的公司？
+        </h1>
+        <p style="font-size: 1em; opacity: 0.6; margin-top: 0.8em; font-weight: 400;">
+          拆解台积电的飞轮、锁定与定价权
+        </p>
+        <div style="margin-top: 2em;">
+          <span class="tag" style="color: var(--c-rose); border-color: var(--c-rose);">纯代工</span>
+          <span class="tag" style="color: var(--c-mint); border-color: var(--c-mint);">飞轮效应</span>
+          <span class="tag" style="color: var(--c-lemon); border-color: var(--c-lemon);">生态锁定</span>
+          <span class="tag" style="color: var(--c-lilac); border-color: var(--c-lilac);">定价权</span>
+        </div>
+        <aside class="notes">
+          这是台积电系列的第二篇。上一篇讲了发家史，这一篇拆解台积电的竞争优势结构。
+          核心论点：台积电的护城河不是单一因素，而是一个多层叠加、自我强化的飞轮系统。
+        </aside>
+      </section>
+
+      <!-- ==================== SLIDE 2: HOOK STAT ==================== -->
+      <section data-background-color="#3E4044" data-transition="fade">
+        <div class="section-label" style="justify-content:center;">2025 年报</div>
+        <div class="big-number" style="color: var(--c-blue);">234<span style="font-size:0.5em;">亿美元</span></div>
+        <p class="stat-context">英伟达超越苹果<br>成为台积电最大单一客户</p>
+        <p class="fragment fade-up stat-detail" style="margin-top: 1em;">贡献全年 19% 营收 — 比前一年翻了一倍还多</p>
+        <aside class="notes">
+          英伟达贡献了台积电全年19%的营收，苹果退居第二占17%。
+          在AI时代，一家做GPU的公司对台积电的重要性已经压过了全球最赚钱的消费电子品牌。
+        </aside>
+      </section>
+
+      <!-- ==================== SLIDE 3: 71% STAT ==================== -->
+      <section data-background-color="#3E4044" data-transition="none">
+        <div class="big-number" style="color: var(--c-peach);">71%</div>
+        <p class="stat-context">全球晶圆代工市场份额</p>
+        <p class="fragment fade-up stat-detail">领先第二名 64 个百分点</p>
+        <p class="fragment fade-up" style="font-size:0.8em; opacity:0.5; margin-top:1.5em;">
+          毛利率接近 60%，净利润率超过 40%<br>
+          <span style="color: var(--c-rose);">一家重资产制造企业，利润水平比很多软件公司还高</span>
+        </p>
+        <aside class="notes">
+          七大逻辑芯片巨头，3nm全部优先选择台积电。
+          这是一家"只帮别人造芯片"的公司。
+        </aside>
+      </section>
+
+      <!-- ==================== SLIDE 4: TRANSITION ==================== -->
+      <section data-background-color="#3E4044" data-transition="fade">
+        <h2 style="font-size: 2.2em; font-weight: 400; opacity: 0.9; color: var(--c-lemon);">
+          这到底是怎么做到的？
+        </h2>
+      </section>
+
+      <!-- ==================== SLIDE 5: SECTION 01 ==================== -->
+      <section data-background-gradient="linear-gradient(135deg, #D97793 0%, #A27BC5 100%)" data-transition="fade">
+        <div class="divider-num">01</div>
+        <div class="divider-title">"不竞争"</div>
+        <div class="divider-sub">为什么是最强的竞争策略</div>
+      </section>
+
+      <!-- ==================== SLIDE 6: TWO COLUMN ==================== -->
+      <section data-background-color="#EEEEEE">
+        <div class="section-label">01 — 不竞争</div>
+        <h3 style="font-size: 1.4em; margin-bottom: 0.8em;">纯代工 vs 混合模式</h3>
+        <div class="two-cols">
+          <div>
+            <h4 style="color: var(--c-mint); font-size: 0.95em; margin-bottom: 0.6em;">台积电（纯代工）</h4>
+            <ul style="list-style: none; font-size: 0.78em;">
+              <li class="fragment fade-up">永远不设计自己的芯片</li>
+              <li class="fragment fade-up">永远不跟客户竞争</li>
+              <li class="fragment fade-up">从根本上消除利益冲突</li>
+            </ul>
+          </div>
+          <div>
+            <h4 style="color: var(--c-rose); font-size: 0.95em; margin-bottom: 0.6em;">三星 / 英特尔（混合）</h4>
+            <ul style="list-style: none; font-size: 0.78em;">
+              <li class="fragment fade-up">同时设计和销售自己的芯片</li>
+              <li class="fragment fade-up">与代工客户存在竞争关系</li>
+              <li class="fragment fade-up">信息隔离无法解决信任问题</li>
+            </ul>
+          </div>
+        </div>
+        <aside class="notes">
+          台积电的"纯代工"模式不是自我约束，是最锋利的武器。
+          当你要把价值几十亿美元的芯片设计交给一家公司时，你选那个"绝对不可能跟你抢生意"的。
+        </aside>
+      </section>
+
+      <!-- ==================== SLIDE 7: BULLET LIST ==================== -->
+      <section data-background-color="#EEEEEE">
+        <div class="section-label">01 — 不竞争</div>
+        <h3 style="font-size: 1.3em; margin-bottom: 0.8em;">客户用脚投票</h3>
+        <ul style="list-style: none; font-size: 0.85em; text-align: left; max-width: 750px; margin: 0 auto;">
+          <li class="fragment fade-up" style="padding: 0.5em 0; border-bottom: 1px solid rgba(0,0,0,0.1);">
+            <span class="mono" style="color: var(--c-blue);">Google</span> — Tensor 芯片从三星搬到台积电，签了三到五年长约
+          </li>
+          <li class="fragment fade-up" style="padding: 0.5em 0; border-bottom: 1px solid rgba(0,0,0,0.1);">
+            <span class="mono" style="color: var(--c-blue);">高通</span> — 取消三星代工线，骁龙 8 Elite 全部交给台积电
+          </li>
+          <li class="fragment fade-up" style="padding: 0.5em 0; border-bottom: 1px solid rgba(0,0,0,0.1);">
+            <span class="mono" style="color: var(--c-rose);">三星自己</span> — Galaxy S25 被迫全线用高通芯片，Exynos 良率搞不定
+          </li>
+          <li class="fragment fade-up" style="padding: 0.5em 0;">
+            <span class="mono" style="color: var(--c-lilac);">英特尔</span> — 代工收入 178 亿，亏损 103 亿，靠政府注资续命
+          </li>
+        </ul>
+      </section>
+
+      <!-- ==================== SLIDE 8: HIGHLIGHT ==================== -->
+      <section data-background-color="#3E4044" data-transition="fade">
+        <p class="highlight-text">这不是信任问题。</p>
+        <p class="fragment grow highlight-punch" style="color: var(--c-peach);">
+          这是数学题。
+        </p>
+      </section>
+
+      <!-- ==================== SLIDE 9: SECTION 02 ==================== -->
+      <section data-background-gradient="linear-gradient(135deg, #36C684 0%, #5787D6 100%)" data-transition="fade">
+        <div class="divider-num">02</div>
+        <div class="divider-title">飞轮效应</div>
+        <div class="divider-sub">规模如何变成不可逾越的优势</div>
+      </section>
+
+      <!-- ==================== SLIDE 10: COMPARISON TABLE ==================== -->
+      <section data-background-color="#EEEEEE">
+        <div class="section-label">02 — 飞轮效应</div>
+        <h3 style="font-size: 1.3em; margin-bottom: 0.5em;">这不是领先，这是碾压</h3>
+        <table>
+          <thead>
+            <tr>
+              <th></th>
+              <th style="color: var(--c-mint);">台积电</th>
+              <th>三星代工</th>
+              <th>格芯</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="fragment fade-up">
+              <td class="mono">营收</td>
+              <td class="winner">1224 亿美元</td>
+              <td>~200 亿</td>
+              <td>~80 亿</td>
+            </tr>
+            <tr class="fragment fade-up">
+              <td class="mono">资本支出</td>
+              <td class="winner">409 亿 → 520-560 亿</td>
+              <td>缩减中</td>
+              <td>有限</td>
+            </tr>
+            <tr class="fragment fade-up">
+              <td class="mono">利润</td>
+              <td class="winner">净利 554 亿</td>
+              <td>亏损 ~24 亿</td>
+              <td>毛利率 ~25%</td>
+            </tr>
+            <tr class="fragment fade-up">
+              <td class="mono">市占率</td>
+              <td class="winner">71%</td>
+              <td>6.8%</td>
+              <td>~5%</td>
+            </tr>
+          </tbody>
+        </table>
+        <aside class="notes">
+          台积电一家的收入比后面所有对手加起来还多。
+          竞争对手拿什么跟？没有利润就没有研发弹药。
+        </aside>
+      </section>
+
+      <!-- ==================== SLIDE 11: FLYWHEEL DIAGRAM ==================== -->
+      <section data-background-color="#3E4044">
+        <div class="section-label" style="justify-content:center;">02 — 飞轮效应</div>
+        <h3 style="font-size: 1.3em; margin-bottom: 0.3em;">自我强化的飞轮</h3>
+        <div class="flywheel">
+          <div class="fragment flywheel-node" style="background: var(--c-peach);">最好的客户</div>
+          <div class="fragment flywheel-arrow">→</div>
+          <div class="fragment flywheel-node" style="background: var(--c-mint);">最大的收入</div>
+          <div class="fragment flywheel-arrow">→</div>
+          <div class="fragment flywheel-node" style="background: var(--c-blue); color: #fff;">最大的投入</div>
+          <div class="fragment flywheel-arrow">→</div>
+          <div class="fragment flywheel-node" style="background: var(--c-lilac); color: #fff;">技术领先</div>
+          <div class="fragment flywheel-arrow">→ ↻</div>
+        </div>
+        <p class="fragment fade-up" style="font-size: 0.8em; opacity: 0.6; margin-top: 1.5em;">
+          飞轮越转越快，差距不是在缩小，而是在拉大
+        </p>
+        <aside class="notes">
+          最残酷的地方在于：你越赢，赢的条件就越好。
+          这是一个赢家通吃的结构。
+        </aside>
+      </section>
+
+      <!-- ==================== SLIDE 12: STAT - MARKET SHARE GROWTH ==================== -->
+      <section data-background-color="#3E4044" data-transition="none">
+        <div style="display: flex; align-items: baseline; justify-content: center; gap: 0.3em;">
+          <span class="big-number" style="color: rgba(255,255,255,0.4); font-size: clamp(3em, 8vw, 6em);">52%</span>
+          <span style="font-size: 2em; opacity: 0.3; margin: 0 0.3em;">→</span>
+          <span class="big-number" style="color: var(--c-mint); font-size: clamp(3em, 8vw, 6em);">71%</span>
+        </div>
+        <p class="stat-context">四年，从"绝对领先"到"近乎垄断"</p>
+        <p class="fragment fade-up stat-detail" style="margin-top:1em;">2021 → 2025 全球晶圆代工市占率</p>
+        <p class="fragment fade-up" style="font-size: 0.8em; opacity: 0.6; margin-top: 1em; color: var(--c-lemon);">
+          你越赢，赢的条件就越好
+        </p>
+      </section>
+
+      <!-- ==================== SLIDE 13: SECTION 03 ==================== -->
+      <section data-background-gradient="linear-gradient(135deg, #F6B86B 0%, #D97793 100%)" data-transition="fade">
+        <div class="divider-num" style="color: rgba(0,0,0,0.15);">03</div>
+        <div class="divider-title" style="color: var(--text-dark);">生态锁定</div>
+        <div class="divider-sub" style="color: rgba(0,0,0,0.6);">换台积电有多难</div>
+      </section>
+
+      <!-- ==================== SLIDE 14: ANALOGY ==================== -->
+      <section data-background-color="#EEEEEE">
+        <div class="section-label">03 — 生态锁定</div>
+        <h3 style="font-size: 1.2em; margin-bottom: 0.8em;">迁移成本高到你放弃换</h3>
+        <div class="two-cols" style="align-items: center;">
+          <div class="fragment fade-right analogy-card" style="background: rgba(87,135,214,0.1);">
+            <h4 style="color: var(--c-blue);">台积电的客户</h4>
+            <p>换代工厂 = 重做整个设计<br>重新验证每一个模块<br>耗时 6–18 个月<br>巨大的良率和上市时间风险</p>
+          </div>
+          <div class="analogy-eq" style="color: var(--text-dark);">≈</div>
+          <div class="fragment fade-left analogy-card" style="background: rgba(217,119,147,0.1);">
+            <h4 style="color: var(--c-rose);">苹果全家桶用户</h4>
+            <p>换安卓 ≠ 只换手机<br>App、照片、iCloud、AirDrop…<br>多年积累全要迁移<br>迁移成本高到你放弃</p>
+          </div>
+        </div>
+        <aside class="notes">
+          OIP开放创新平台把芯片设计的整条工具链绑在台积电身上。
+          EDA工具、Arm架构、IP供应商都优先支持台积电平台。
+          对英伟达这种一年迭代一代GPU的公司来说，花一年半换代工厂不叫选项，叫自杀。
+        </aside>
+      </section>
+
+      <!-- ==================== SLIDE 15: STAT - PREPAYMENT ==================== -->
+      <section data-background-color="#3E4044" data-transition="none">
+        <div class="big-number" style="color: var(--c-lemon);">2911<span style="font-size:0.35em;">亿新台币</span></div>
+        <p class="stat-context">客户预付锁定台积电未来产能</p>
+        <p class="fragment fade-up" style="font-size: 0.85em; opacity: 0.6; margin-top: 1em;">
+          不是因为大方，而是因为没有别的选择
+        </p>
+        <p class="fragment fade-up" style="font-size: 0.9em; color: var(--c-rose); margin-top: 0.8em; font-weight: 600;">
+          拿不到台积电的产能，你的芯片就不存在
+        </p>
+      </section>
+
+      <!-- ==================== SLIDE 16: SECTION 04 ==================== -->
+      <section data-background-gradient="linear-gradient(135deg, #5787D6 0%, #A27BC5 100%)" data-transition="fade">
+        <div class="divider-num">04</div>
+        <div class="divider-title">技术领先</div>
+        <div class="divider-sub">一步快，步步快</div>
+      </section>
+
+      <!-- ==================== SLIDE 17: COMPARISON - YIELD ==================== -->
+      <section data-background-color="#3E4044">
+        <div class="section-label" style="justify-content:center;">04 — 技术领先</div>
+        <h3 style="font-size: 1.2em; margin-bottom: 1em;">3nm 良率：不同量级的差距</h3>
+        <div class="two-cols" style="justify-content: center; max-width: 800px; margin: 0 auto;">
+          <div style="text-align: center;">
+            <div style="font-size: 4.5em; font-weight: 900; color: var(--c-mint); line-height: 1;">
+              >90%
+            </div>
+            <p style="font-size: 0.85em; opacity: 0.6; margin-top: 0.5em;">台积电 3nm 良率</p>
+          </div>
+          <div style="text-align: center;">
+            <div class="fragment fade-up" style="font-size: 4.5em; font-weight: 900; color: var(--c-rose); line-height: 1;">
+              ~20%
+            </div>
+            <p class="fragment fade-up" style="font-size: 0.85em; opacity: 0.6; margin-top: 0.5em;">三星 3nm 良率</p>
+            <p class="fragment fade-up" style="font-size: 0.65em; opacity: 0.4; margin-top: 0.3em;">
+              初期仅个位数，第二代又掉回 20%
+            </p>
+          </div>
+        </div>
+        <p class="fragment fade-up" style="font-size: 0.78em; opacity: 0.5; margin-top: 1.5em;">
+          三星代工市占率 18 个月内从 11% 腰斩到 6.8%<br>
+          <span style="color: var(--c-lemon);">连三星自己的手机部门都"走了"</span>
+        </p>
+        <aside class="notes">
+          芯片制造的核心know-how大量来自经验积累——数千名工程师在产线上日复一日调试参数形成的隐性知识。
+          台积电先量产、先收集数据、先优化，后来者每追一步，台积电已经往前走了两步。
+          第二条护城河：CoWoS先进封装技术，产能两年扩张近六倍仍供不应求。
+        </aside>
+      </section>
+
+      <!-- ==================== SLIDE 18: QUOTE ==================== -->
+      <section data-background-color="#3E4044" data-transition="fade">
+        <blockquote style="font-size: 1.5em; border-left: 5px solid var(--c-peach); padding: 0.5em 1em; text-align: left; max-width: 700px; margin: 0 auto; line-height: 1.8; color: var(--text-light);">
+          "产能卖光了，一直到 2026 年都是满的"
+        </blockquote>
+        <p class="fragment fade-up" style="text-align: right; max-width: 700px; margin: 1em auto 0; opacity: 0.5; font-family: 'Space Mono', monospace; font-size: 0.7em;">
+          — 魏哲家，台积电 CEO
+        </p>
+        <p class="fragment fade-up" style="font-size: 0.8em; opacity: 0.5; margin-top: 2em;">
+          CoWoS 先进封装产能两年扩张近六倍，仍然供不应求
+        </p>
+      </section>
+
+      <!-- ==================== SLIDE 19: SECTION 05 ==================== -->
+      <section data-background-gradient="linear-gradient(135deg, #EFE449 0%, #F6B86B 100%)" data-transition="fade">
+        <div class="divider-num" style="color: rgba(0,0,0,0.12);">05</div>
+        <div class="divider-title" style="color: var(--text-dark);">定价权</div>
+        <div class="divider-sub" style="color: rgba(0,0,0,0.55);">全球最重要公司的底气</div>
+      </section>
+
+      <!-- ==================== SLIDE 20: STAT - MARGIN ==================== -->
+      <section data-background-color="#3E4044" data-transition="none">
+        <div class="big-number" style="color: var(--c-mint);">62.3%</div>
+        <p class="stat-context">Q4 毛利率 — 历史新高</p>
+        <div class="fragment fade-up" style="margin-top: 1.5em;">
+          <p style="font-size: 0.9em; opacity: 0.7;">
+            全年净利润 <span style="color: var(--c-peach); font-weight: 700;">554 亿美元</span>，同比增长 46%
+          </p>
+        </div>
+        <div class="fragment fade-up" style="margin-top: 1em; font-size: 0.75em; opacity: 0.45; font-family: 'Space Mono', monospace;">
+          2nm 晶圆 ~3 万美元/片（+50%） · A16 传闻 ~4.5 万美元
+        </div>
+        <p class="fragment fade-up" style="font-size: 0.8em; opacity: 0.5; margin-top: 1em;">
+          客户抱怨？抱怨。走吗？<span style="color: var(--c-rose);">不走。因为没地方去。</span>
+        </p>
+        <aside class="notes">
+          对比：三星代工2024年亏了约24亿美元。格芯毛利率约25%。
+          同一个行业，完全不同的世界。
+        </aside>
+      </section>
+
+      <!-- ==================== SLIDE 21: TSMC BRAKE ==================== -->
+      <section data-background-color="#3E4044" data-auto-animate>
+        <div class="section-label" style="justify-content:center;">05 — 定价权</div>
+        <h2 data-id="brake" style="font-size: 1.8em; color: var(--c-lemon);">TSMC Brake</h2>
+        <p class="fragment fade-up" style="font-size: 1.05em; opacity: 0.8; max-width: 700px; margin: 1em auto 0; line-height: 1.8;">
+          台积电不光有定价权<br>
+          它还有<span style="color: var(--c-peach); font-weight: 700;">"不扩产"的权利</span><br>
+          ——而这可能是更大的权力
+        </p>
+        <p class="fragment fade-up" style="font-size: 0.8em; opacity: 0.5; max-width: 650px; margin: 1.5em auto 0; line-height: 1.7;">
+          没有竞争对手逼它扩产 → 理性控制节奏 → 产能永远偏紧 → 价格永远在涨 → 利润更高 → 追赶者更难翻盘
+        </p>
+        <p class="fragment fade-up mono" style="opacity: 0.4; margin-top: 1.5em; font-size: 0.6em;">
+          框架来源：Ben Thompson, "The TSMC Brake"
+        </p>
+        <aside class="notes">
+          魏哲家在财报电话会上说："客户告诉我硅产能是瓶颈，让我先解决。"但紧接着说："我也非常紧张，如果不谨慎行事，那将是灾难。"
+          Thompson的结论：唯一能推动台积电冒险扩产的力量是有效的竞争——但有效的竞争，目前看不到。
+        </aside>
+      </section>
+
+      <!-- ==================== SLIDE 22: CLOSING ==================== -->
+      <section data-background-color="#3E4044" data-transition="fade">
+        <h2 style="font-size: 1.5em; line-height: 1.6; font-weight: 400; opacity: 0.8;">
+          飞轮一旦转起来<br>
+          追赶者面对的不是一个强大的对手
+        </h2>
+        <p class="fragment" style="font-size: 1.8em; font-weight: 900; color: var(--c-peach); margin-top: 0.3em;">
+          而是一整个系统
+        </p>
+        <div class="fragment closing-flow" style="margin-top: 1.5em;">
+          <span style="background: var(--c-rose); color: #fff;">客户中立</span>
+          <span class="closing-sep">→</span>
+          <span style="background: var(--c-mint); color: var(--text-dark);">规模效应</span>
+          <span class="closing-sep">→</span>
+          <span style="background: var(--c-peach); color: var(--text-dark);">生态锁定</span>
+          <span class="closing-sep">→</span>
+          <span style="background: var(--c-blue); color: #fff;">技术领先</span>
+          <span class="closing-sep">→</span>
+          <span style="background: var(--c-lemon); color: var(--text-dark);">定价权</span>
+        </div>
+        <p class="fragment fade-up" style="font-size: 0.75em; opacity: 0.4; margin-top: 2.5em; max-width: 600px; margin-left: auto; margin-right: auto; line-height: 1.7;">
+          但没有任何护城河是永恒的。<br>
+          台积电超过 90% 的先进制程产能集中在台湾。<br>
+          <span style="color: var(--c-rose);">下一篇：台积电的命门</span>
+        </p>
+        <aside class="notes">
+          五层飞轮：客户中立是入口，规模效应是加速器，生态锁定是护栏，技术领先是引擎，定价权是结果。
+          但留一个悬念：90%产能在台湾——这是下一篇的主题。
+        </aside>
+      </section>
+
+    </div><!-- /.slides -->
+  </div><!-- /.reveal -->
+
+  <script src="https://cdn.jsdelivr.net/npm/reveal.js@5/dist/reveal.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/reveal.js@5/plugin/notes/notes.js"></script>
+  <script>
+    Reveal.initialize({
+      hash: true,
+      transition: 'slide',
+      transitionSpeed: 'default',
+      backgroundTransition: 'fade',
+      autoAnimateDuration: 0.7,
+      autoAnimateEasing: 'ease',
+      width: 1920,
+      height: 1080,
+      margin: 0.06,
+      center: true,
+      controls: true,
+      progress: true,
+      plugins: [RevealNotes]
+    });
+  </script>
+</body>
+</html>

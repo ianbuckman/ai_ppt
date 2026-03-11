@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>通用 Agent 范式：谁相信，谁质疑</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5/dist/reset.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5/dist/reveal.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5/dist/theme/black.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5/plugin/highlight/monokai.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Archivo+Black&family=Space+Grotesk:wght@400;500;700&family=Noto+Sans+SC:wght@400;700;900&display=swap');
+
+    :root {
+      --bg-primary: #1a1a1a;
+      --bg-gradient: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 50%, #1a1a1a 100%);
+      --card-bg: #FF5722;
+      --text-primary: #ffffff;
+      --text-on-card: #1a1a1a;
+      --accent: #FF5722;
+      --accent-dim: rgba(255, 87, 34, 0.15);
+      --r-background-color: #1a1a1a;
+      --r-main-color: #ffffff;
+      --r-heading-color: #FF5722;
+      --r-main-font: "Space Grotesk", "Noto Sans SC", "PingFang SC", sans-serif;
+      --r-heading-font: "Archivo Black", "Noto Sans SC", "PingFang SC", sans-serif;
+      --r-main-font-size: 32px;
+      --r-heading-line-height: 1.3;
+      --r-block-margin: 20px;
+    }
+
+    .reveal {
+      line-height: 1.8;
+      letter-spacing: 0.05em;
+    }
+    .reveal h1, .reveal h2, .reveal h3 {
+      letter-spacing: 0.08em;
+      font-weight: 700;
+      text-transform: none;
+    }
+    .reveal h1 { font-size: 2.2em; }
+    .reveal h2 { font-size: 1.8em; }
+    .reveal h3 { font-size: 1.3em; }
+
+    .reveal blockquote {
+      font-style: normal;
+      border-left: 4px solid var(--accent);
+      padding: 0.6em 1.2em;
+      text-align: left;
+      background: var(--accent-dim);
+      border-radius: 0 8px 8px 0;
+      width: 85%;
+      margin: 0 auto;
+    }
+
+    .reveal ul li, .reveal ol li {
+      margin-bottom: 0.6em;
+      line-height: 1.8;
+    }
+
+    .accent { color: var(--accent); }
+    .dim { opacity: 0.5; }
+    .big-number {
+      font-size: 7em;
+      font-weight: 900;
+      line-height: 1;
+      color: var(--accent);
+      font-family: "Archivo Black", "Noto Sans SC", sans-serif;
+    }
+
+    .quote-with-photo {
+      display: flex;
+      align-items: center;
+      gap: 2.5em;
+      max-width: 90%;
+      margin: 0 auto;
+    }
+    .quote-with-photo .photo {
+      flex-shrink: 0;
+      width: 180px;
+      height: 180px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid var(--accent);
+      box-shadow: 0 0 30px rgba(255, 87, 34, 0.3);
+    }
+    .quote-with-photo .quote-content {
+      flex: 1;
+      text-align: left;
+    }
+
+    .section-num {
+      font-size: 5em;
+      font-weight: 900;
+      opacity: 0.2;
+      margin: 0;
+      line-height: 1;
+      font-family: "Archivo Black", sans-serif;
+    }
+
+    .two-cols {
+      display: flex;
+      gap: 2em;
+      margin-top: 1em;
+      text-align: left;
+    }
+    .two-cols > div {
+      flex: 1;
+      padding: 1.5em;
+      border-radius: 12px;
+    }
+    .col-left { background: rgba(255, 87, 34, 0.12); }
+    .col-right { background: rgba(255, 255, 255, 0.06); }
+
+    .diagram-stack {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0;
+      margin-top: 1em;
+    }
+    .diagram-layer {
+      padding: 0.8em 2.5em;
+      border-radius: 8px;
+      font-size: 0.9em;
+      font-weight: 700;
+      width: 70%;
+      text-align: center;
+      position: relative;
+    }
+    .diagram-layer.engine {
+      background: var(--accent);
+      color: #1a1a1a;
+      font-size: 1.1em;
+      padding: 1em 2.5em;
+      z-index: 2;
+    }
+    .diagram-layer.mid {
+      background: rgba(255, 87, 34, 0.3);
+      width: 80%;
+    }
+    .diagram-layer.top {
+      background: rgba(255, 255, 255, 0.08);
+      width: 90%;
+    }
+    .diagram-arrow {
+      font-size: 1.5em;
+      opacity: 0.4;
+      margin: 0.1em 0;
+    }
+
+    .tag {
+      display: inline-block;
+      padding: 0.2em 0.8em;
+      border-radius: 20px;
+      font-size: 0.7em;
+      margin: 0.2em;
+      font-weight: 500;
+    }
+    .tag-orange { background: var(--accent); color: #1a1a1a; }
+    .tag-dim { background: rgba(255, 255, 255, 0.1); color: #ccc; }
+
+    .attribution {
+      text-align: right;
+      opacity: 0.6;
+      font-size: 0.75em;
+      margin-top: 0.8em;
+    }
+
+    .slide-footer {
+      position: absolute;
+      bottom: 1.5em;
+      left: 2em;
+      font-size: 0.5em;
+      opacity: 0.3;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.2s !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="reveal">
+    <div class="slides">
+
+      <!-- ============ Slide 1: Cover ============ -->
+      <section data-background-gradient="linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 50%, #1a1a1a 100%)">
+        <p style="font-size: 0.7em; opacity: 0.5; letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 0.5em;">行业深度分析</p>
+        <h1 style="font-size: 2.4em; line-height: 1.3;">
+          通用 Agent 范式<br>
+          <span class="accent">谁相信，谁质疑</span>
+        </h1>
+        <p style="font-size: 1em; opacity: 0.6; margin-top: 1.5em;">
+          模型 + Agent 运行时 + 可组合工具 → 取代大多数专业化 AI Agent？
+        </p>
+        <p style="font-size: 0.6em; opacity: 0.3; margin-top: 2em;">2026</p>
+        <aside class="notes">
+          这是一篇关于 AI 行业最大分歧的深度分析。核心问题：通用 Agent 能否取代专业化 Agent？
+          Anthropic、Karpathy、OpenAI、Google、Nadella 都在押注，但 LeCun 强烈反对。
+        </aside>
+      </section>
+
+      <!-- ============ Slide 2: Hook — Two opposing quotes ============ -->
+      <section data-background-color="#1a1a1a">
+        <h3 style="opacity: 0.5; font-size: 0.9em; margin-bottom: 1.5em;">行业最大分歧</h3>
+        <div class="two-cols">
+          <div class="col-left" style="text-align: center;">
+            <p style="font-size: 0.7em; opacity: 0.6; margin-bottom: 0.5em;">Satya Nadella</p>
+            <p style="font-size: 1.3em; font-weight: 700;" class="fragment fade-right">
+              "SaaS 全部会<br><span class="accent">坍缩进 Agent 层</span>"
+            </p>
+          </div>
+          <div class="col-right" style="text-align: center;">
+            <p style="font-size: 0.7em; opacity: 0.6; margin-bottom: 0.5em;">Yann LeCun</p>
+            <p style="font-size: 1.3em; font-weight: 700;" class="fragment fade-left">
+              "通用智能？<br><span style="color: #888;">完全没有意义</span>"
+            </p>
+          </div>
+        </div>
+        <p class="fragment fade-up" style="margin-top: 2em; font-size: 0.8em; opacity: 0.5;">
+          这两个人不可能都对——除非答案比两者都更微妙
+        </p>
+        <aside class="notes">
+          用两个极端观点开场制造张力。Nadella 认为 Agent 会吞噬一切，LeCun 认为通用智能不存在。
+          真相在中间——这就是接下来要讲的故事。
+        </aside>
+      </section>
+
+      <!-- ============ Slide 3: Section Divider — 信念者 ============ -->
+      <section data-background-gradient="linear-gradient(135deg, #FF5722 0%, #E64A19 100%)" data-transition="fade">
+        <p class="section-num" style="color: #1a1a1a;">01</p>
+        <h2 style="color: #1a1a1a; margin-top: -0.2em;">信念者</h2>
+        <p style="color: rgba(26, 26, 26, 0.7); font-size: 0.9em;">谁在押注通用 Agent？</p>
+        <aside class="notes">
+          第一部分：看看科技行业的重量级人物如何看待通用 Agent 范式。
+        </aside>
+      </section>
+
+      <!-- ============ Slide 4: Thesis — Anthropic ============ -->
+      <section data-auto-animate data-background-color="#1a1a1a">
+        <p style="font-size: 0.7em; opacity: 0.5;">Anthropic 的核心哲学</p>
+        <h2 data-id="thesis-anthropic" style="font-size: 2.2em; margin-top: 0.5em;">
+          给 Agent <span class="accent">一台计算机</span>
+        </h2>
+        <p class="fragment fade-up" style="font-size: 0.9em; opacity: 0.7; margin-top: 1.5em; max-width: 75%; margin-left: auto; margin-right: auto;">
+          与其为每个领域构建专门的工具 API，<br>
+          不如给 Claude bash 命令、文件操作和搜索——<br>
+          和人类程序员使用的原语完全一样
+        </p>
+        <aside class="notes">
+          Anthropic 是通用 Agent 范式最明确的支持者。核心理念极其简洁：给 Agent 一台计算机。
+          Claude Code 从编程工具演变为通用自动化平台，SDK 改名为 Agent SDK。
+        </aside>
+      </section>
+
+      <!-- ============ Slide 5: Bullet — Agent Skills ============ -->
+      <section data-background-color="#1a1a1a">
+        <h3>Agent Skills：可组合专业化</h3>
+        <p style="font-size: 0.8em; opacity: 0.5; margin-bottom: 1.2em;">通用底座 + 任何人都能编写的插件式专业化</p>
+        <ul>
+          <li class="fragment fade-up">Claude Code SDK → <span class="accent">Agent SDK</span>（2025.9 正式更名）</li>
+          <li class="fragment fade-up">Skills = 可组合的 <span class="accent">markdown 文件</span>，将通用 Agent 变成领域专家</li>
+          <li class="fragment fade-up">"最成功的实现使用<span class="accent">简单、可组合的模式</span>，而非复杂框架"</li>
+        </ul>
+        <p class="fragment fade-up attribution">— 《构建有效的 Agent》, Anthropic, 2024.12</p>
+        <aside class="notes">
+          Agent Skills 是范式的关键创新：用 markdown 文件而非代码实现领域专业化。
+          Anthropic 的基础性论文强调简单性和可组合性胜过专业化的复杂性。
+        </aside>
+      </section>
+
+      <!-- ============ Slide 6: Quote + Photo — Karpathy ============ -->
+      <section data-background-color="#1a1a1a">
+        <div class="quote-with-photo">
+          <img src="../images/karpathy.png" alt="Andrej Karpathy" class="photo">
+          <div class="quote-content">
+            <blockquote style="font-size: 1.2em; line-height: 1.8;">
+              "Software 3.0 正在吞噬 1.0/2.0<br>大量软件将被重写"
+            </blockquote>
+            <p class="attribution">— Andrej Karpathy, YC AI Startup School, 2025.6</p>
+            <p class="fragment fade-up" style="font-size: 0.8em; opacity: 0.6; margin-top: 1em;">
+              他将 Claude Code 认定为"LLM Agent 的<span class="accent">首个令人信服的演示</span>"
+            </p>
+          </div>
+        </div>
+        <aside class="notes">
+          Karpathy 是 AI 工程领域最有影响力的独立声音。
+          他肯定了 Software 3.0 正在吞噬传统软件，并点名 Claude Code 为首个令人信服的 Agent 演示。
+        </aside>
+      </section>
+
+      <!-- ============ Slide 7: Two-Column — Karpathy's balance ============ -->
+      <section data-background-color="#1a1a1a">
+        <h3>Karpathy 的中间路线</h3>
+        <div class="two-cols" style="margin-top: 1em;">
+          <div class="col-left">
+            <h4 style="color: var(--accent); font-size: 0.9em; margin-bottom: 0.5em;">✓ 肯定通用基础</h4>
+            <p style="font-size: 0.8em;" class="fragment fade-up">LLM = 新操作系统的内核</p>
+            <p style="font-size: 0.8em;" class="fragment fade-up">Software 3.0 吞噬一切</p>
+            <p style="font-size: 0.8em;" class="fragment fade-up">Claude Code = 首个令人信服的 Agent</p>
+          </div>
+          <div class="col-right">
+            <h4 style="color: #ccc; font-size: 0.9em; margin-bottom: 0.5em;">+ 坚持厚应用层</h4>
+            <p style="font-size: 0.8em;" class="fragment fade-up">"Cursor for X" 垂直应用模式</p>
+            <p style="font-size: 0.8em;" class="fragment fade-up">自主权滑块：渐进扩展</p>
+            <p style="font-size: 0.8em;" class="fragment fade-up">领域 GUI + 上下文工程</p>
+          </div>
+        </div>
+        <aside class="notes">
+          Karpathy 采取审慎的中间立场：肯定通用基础，但坚持厚应用层将持续存在。
+          "Cursor for X"模式——做上下文工程、提供领域 GUI、自主权滑块——代表可防御的应用层。
+        </aside>
+      </section>
+
+      <!-- ============ Slide 8: Highlight — Jagged Intelligence ============ -->
+      <section data-transition="fade" data-background-color="#1a1a1a">
+        <p style="font-size: 1.2em; opacity: 0.7;">Karpathy 的关键概念</p>
+        <h2 style="font-size: 2.5em; margin-top: 0.5em;">
+          <span class="accent">参差不齐的智能</span>
+        </h2>
+        <p class="fragment fade-up" style="font-size: 1em; opacity: 0.6; margin-top: 1em;">
+          能解决复杂数学，却在极简单任务上犯错
+        </p>
+        <p class="fragment fade-up" style="font-size: 1.3em; margin-top: 1.5em; font-weight: 700;">
+          → Agent 的<span class="accent">十年</span>，而非一年
+        </p>
+        <aside class="notes">
+          "参差不齐的智能"是 Karpathy 的关键贡献——前沿 LLM 能力极不均匀。
+          这就是为什么完全自主需要谨慎、渐进地扩展，是十年级别的事业。
+        </aside>
+      </section>
+
+      <!-- ============ Slide 9: Quote + Photo — Altman ============ -->
+      <section data-background-color="#1a1a1a">
+        <div class="quote-with-photo">
+          <img src="../images/altman.png" alt="Sam Altman" class="photo">
+          <div class="quote-content">
+            <blockquote style="font-size: 1.15em; line-height: 1.8;">
+              "我们现在有信心知道如何构建 AGI。<br>
+              2025 年将见证首批 AI Agent<br>
+              <span class="accent">'加入劳动力'</span>"
+            </blockquote>
+            <p class="attribution">— Sam Altman, 《反思》, 2025.1</p>
+            <p class="fragment fade-up" style="font-size: 0.75em; opacity: 0.5; margin-top: 0.8em;">
+              后来提出"温和奇点"：2035 年任何人都能调动相当于 2025 年所有人的智力资源
+            </p>
+          </div>
+        </div>
+        <aside class="notes">
+          Altman 为 OpenAI 设定了战略框架：AGI 的信心 + Agent 加入劳动力。
+          "温和奇点"概念暗示渐进但深远的变革。
+        </aside>
+      </section>
+
+      <!-- ============ Slide 10: Story — OpenAI + Google convergence ============ -->
+      <section data-background-color="#1a1a1a">
+        <h3>OpenAI + Google：殊途同归</h3>
+        <div style="text-align: left; max-width: 85%; margin: 1.2em auto;">
+          <p class="fragment fade-up" style="margin-bottom: 1em;">
+            <span class="tag tag-orange">OpenAI</span>
+            GPT-5-Codex 从专业模型起步 → 重新整合进通用模型<br>
+            <span class="dim" style="font-size: 0.8em;">"从助手到 Agent 到完整应用的进化将感觉是<span class="accent">连续的</span>"</span>
+          </p>
+          <p class="fragment fade-up" style="margin-bottom: 1em;">
+            <span class="tag tag-orange">Google</span>
+            Gemini 2.0 作为通用基础 → Co-Scientist / Astra / 企业 Agent<br>
+            <span class="dim" style="font-size: 0.8em;">Hassabis："你需要一个能推理、分解问题并<span class="accent">在世界中执行行动</span>的系统"</span>
+          </p>
+          <p class="fragment fade-up" style="opacity: 0.6; font-size: 0.85em; margin-top: 1.5em; text-align: center;">
+            两家都拥抱 MCP 互操作 → 与 Anthropic 的范式趋同
+          </p>
+        </div>
+        <aside class="notes">
+          OpenAI 创建了专业化的 Codex 模型，但最终承认向"通用之中的专业化"趋同。
+          Google 用 Gemini 作为通用基础驱动多样化应用。两家都通过 MCP 拥抱可组合性。
+        </aside>
+      </section>
+
+      <!-- ============ Slide 11: Quote + Photo — Nadella ============ -->
+      <section data-background-color="#1a1a1a">
+        <div class="quote-with-photo">
+          <img src="../images/Nadella.png" alt="Satya Nadella" class="photo">
+          <div class="quote-content">
+            <blockquote style="font-size: 1.15em; line-height: 1.8;">
+              "嘿，我为什么需要 Excel？<br>
+              业务逻辑全都会转移到 Agent 上<br>
+              我们会非常积极地<span class="accent">把一切都坍缩掉</span>"
+            </blockquote>
+            <p class="attribution">— Satya Nadella, BG2 Podcast, 2024.12</p>
+            <p class="fragment fade-up" style="font-size: 0.8em; opacity: 0.6; margin-top: 0.8em;">
+              Agent 不仅是工具 → 是整个企业软件品类的<span class="accent">替代者</span>
+            </p>
+          </div>
+        </div>
+        <aside class="notes">
+          Nadella 的声明最具挑衅性：SaaS 全部坍缩进 Agent 层。
+          连微软自己的 Excel 都可以被取代。这是对整个企业软件行业的宣战。
+        </aside>
+      </section>
+
+      <!-- ============ Slide 12: Transition ============ -->
+      <section data-transition="fade" data-background-gradient="linear-gradient(135deg, #2d2d2d 0%, #1a1a1a 100%)">
+        <h2 style="font-weight: 400; font-size: 1.6em; opacity: 0.8;">
+          五位科技巨头都在押注同一个方向<br><br>
+          <span class="fragment fade-up" style="opacity: 0.5; font-size: 0.8em;">——但有人不同意</span>
+        </h2>
+        <aside class="notes">
+          过渡幻灯片，制造悬念。从信念者过渡到质疑者。
+        </aside>
+      </section>
+
+      <!-- ============ Slide 13: Section Divider — 质疑者 ============ -->
+      <section data-background-gradient="linear-gradient(135deg, #424242 0%, #212121 100%)" data-transition="fade">
+        <p class="section-num">02</p>
+        <h2 style="margin-top: -0.2em;">质疑者</h2>
+        <p style="opacity: 0.6; font-size: 0.9em;">通用智能是幻觉？</p>
+        <aside class="notes">
+          第二部分：质疑者的声音。以 LeCun 为首，还有实践者和研究者的反对。
+        </aside>
+      </section>
+
+      <!-- ============ Slide 14: Quote + Photo — LeCun ============ -->
+      <section data-background-color="#1a1a1a">
+        <div class="quote-with-photo">
+          <img src="../images/lecun.png" alt="Yann LeCun" class="photo" style="border-color: #888;">
+          <div class="quote-content">
+            <blockquote style="font-size: 1.2em; line-height: 1.8; border-left-color: #888; background: rgba(255,255,255,0.05);">
+              "不存在通用智能这种东西。<br>
+              这个概念<span style="color: #888;">完全没有意义</span>"
+            </blockquote>
+            <p class="attribution">— Yann LeCun, Meta 首席 AI 科学家, 2025.12</p>
+            <p class="fragment fade-up" style="font-size: 0.8em; opacity: 0.6; margin-top: 0.8em;">
+              数学论证：人脑可表示 <strong style="color: #FF5722;">2<sup>(3.2×10¹⁵)</sup></strong> 个函数<br>
+              <span class="dim">与所有可能函数相比——"一个极小的数字"</span>
+            </p>
+          </div>
+        </div>
+        <aside class="notes">
+          LeCun 是最强反对声。他从数学角度论证即使人类也是"极度专业化的"。
+          他警告演示与部署之间的鸿沟很大。
+        </aside>
+      </section>
+
+      <!-- ============ Slide 15: Bullet — Three failure modes ============ -->
+      <section data-background-color="#1a1a1a">
+        <h3>反对派的三个核心论点</h3>
+        <div style="text-align: left; max-width: 85%; margin: 1.2em auto;">
+          <div class="fragment fade-up" style="padding: 1em; background: rgba(255,255,255,0.05); border-radius: 8px; margin-bottom: 0.8em; border-left: 3px solid #FF5722;">
+            <strong class="accent">领域专业知识缺失</strong>
+            <p style="font-size: 0.8em; opacity: 0.7; margin-top: 0.3em;">"在看似令人印象深刻的表面知识薄纱之下，往往什么都没有" — Baudiš</p>
+          </div>
+          <div class="fragment fade-up" style="padding: 1em; background: rgba(255,255,255,0.05); border-radius: 8px; margin-bottom: 0.8em; border-left: 3px solid #FF5722;">
+            <strong class="accent">领域整合困难</strong>
+            <p style="font-size: 0.8em; opacity: 0.7; margin-top: 0.3em;">专家经验需要与目的相关的操作限制，通用 Agent 缺乏这种约束</p>
+          </div>
+          <div class="fragment fade-up" style="padding: 1em; background: rgba(255,255,255,0.05); border-radius: 8px; border-left: 3px solid #FF5722;">
+            <strong class="accent">质量控制风险</strong>
+            <p style="font-size: 0.8em; opacity: 0.7; margin-top: 0.3em;">"给一个自信但资浅的人不受约束的权力" — IBM: "Agent 往往非常低效"</p>
+          </div>
+        </div>
+        <aside class="notes">
+          Baudiš 指出三个失败模式：领域专业知识缺失、整合困难、质量控制风险。
+          IBM 研究人员警告 Agent 非常低效，不是所有流程都适合 Agent 编排。
+        </aside>
+      </section>
+
+      <!-- ============ Slide 16: Transition ============ -->
+      <section data-transition="fade" data-background-gradient="linear-gradient(135deg, #2d2d2d 0%, #1a1a1a 100%)">
+        <h2 style="font-weight: 400; font-size: 2em;">
+          那么，<span class="accent">谁对了</span>？
+        </h2>
+        <p class="fragment fade-up" style="opacity: 0.5; font-size: 0.9em; margin-top: 1.5em;">
+          答案比两个阵营都更微妙
+        </p>
+        <aside class="notes">
+          过渡到共识部分。答案不是简单的通用或专业化——而是一种新的混合架构。
+        </aside>
+      </section>
+
+      <!-- ============ Slide 17: Section Divider — 共识 ============ -->
+      <section data-background-gradient="linear-gradient(135deg, #FF5722 0%, #FF8A65 100%)" data-transition="fade">
+        <p class="section-num" style="color: #1a1a1a;">03</p>
+        <h2 style="color: #1a1a1a; margin-top: -0.2em;">正在形成的共识</h2>
+        <p style="color: rgba(26, 26, 26, 0.7); font-size: 0.9em;">可组合专业化的混合编排</p>
+        <aside class="notes">
+          第三部分：最精通的声音正在趋同于一种混合模型——通用底座 + 可组合专业化。
+        </aside>
+      </section>
+
+      <!-- ============ Slide 18: Thesis — Harrison Chase ============ -->
+      <section data-auto-animate data-background-color="#1a1a1a">
+        <p style="font-size: 0.7em; opacity: 0.5;">Harrison Chase, LangChain CEO</p>
+        <h2 data-id="chase-thesis" style="font-size: 1.8em; margin-top: 0.5em; line-height: 1.5;">
+          区别不在于通用 vs. 专业化<br>
+          而在于<span class="accent">上下文工程</span>的质量
+        </h2>
+        <p class="fragment fade-up" style="font-size: 0.9em; opacity: 0.6; margin-top: 1.5em; max-width: 80%; margin-left: auto; margin-right: auto;">
+          "当 Agent 搞砸时，是因为它们没有正确的上下文；<br>
+          当它们成功时，是因为它们有正确的上下文"
+        </p>
+        <aside class="notes">
+          Chase 的洞察重新定义了整场辩论：关键不是通用还是专业化，而是上下文工程的质量。
+          这是最优雅的综合：通用引擎 + 正确的上下文 = 领域专家。
+        </aside>
+      </section>
+
+      <!-- ============ Slide 19: Story — Boris Renski ============ -->
+      <section data-background-color="#1a1a1a">
+        <h3>实践验证：从专业化到通用</h3>
+        <div style="text-align: left; max-width: 85%; margin: 1em auto;">
+          <p class="fragment fade-up" style="margin-bottom: 1em;">
+            <strong style="color: #888;">起点：</strong>Boris Renski（Apelogic）构建了专业化数据 Agent<br>
+            <span class="dim" style="font-size: 0.85em;">→ "其实效果不太好"——脆弱、缓慢、经常出错</span>
+          </p>
+          <p class="fragment fade-up" style="margin-bottom: 1em;">
+            <strong class="accent">转向：</strong>改用 Claude + MCP 连接器（通用 Agent）<br>
+            <span class="dim" style="font-size: 0.85em;">→ 显著更好的结果</span>
+          </p>
+          <p class="fragment fade-up" style="font-size: 1.3em; font-weight: 700; text-align: center; margin-top: 1.5em;">
+            通用 Agent 已能处理专业化 Agent<br>
+            <span class="accent" style="font-size: 1.4em;">约 95%</span> 的工作
+          </p>
+        </div>
+        <aside class="notes">
+          Boris Renski 的经历是最有说服力的实际案例：他亲自尝试了专业化路线，发现不如通用 Agent。
+          95% 这个数字非常关键——而且"随着前沿模型改进，比例还在攀升"。
+        </aside>
+      </section>
+
+      <!-- ============ Slide 20: Quote — Simon Willison ============ -->
+      <section data-background-color="#1a1a1a">
+        <p style="font-size: 0.7em; opacity: 0.5; margin-bottom: 0.5em;">Simon Willison — 从怀疑者到信徒的完全逆转</p>
+        <blockquote style="font-size: 1.25em; line-height: 1.8; max-width: 85%;">
+          "Claude Code 这个名字取得不好。<br>
+          它不纯粹是编程工具——它是<span class="accent">通用计算机自动化工具</span>。<br>
+          最好把它描述为<span class="accent">通用 Agent</span>"
+        </blockquote>
+        <p class="attribution">— Simon Willison, 独立开发者/博主</p>
+        <p class="fragment fade-up" style="font-size: 0.9em; opacity: 0.5; margin-top: 1.5em;">
+          "一个<span class="accent">伪装成开发者工具</span>的通用 Agent"
+        </p>
+        <aside class="notes">
+          Willison 的逆转特别有说服力——他在 2024 年末还预测大量资金会亏损。
+          现在他完全改变立场，称 Claude Code 为"伪装成开发者工具的通用 Agent"。
+        </aside>
+      </section>
+
+      <!-- ============ Slide 21: Single Stat — China market ============ -->
+      <section data-background-color="#1a1a1a" data-transition="none">
+        <p style="font-size: 0.8em; opacity: 0.5; margin-bottom: 0.5em;">中国 AI Agent 市场规模</p>
+        <div>
+          <span style="font-size: 1.5em; opacity: 0.5;">554 亿</span>
+          <span style="font-size: 2em; margin: 0 0.3em;">→</span>
+          <span class="big-number" style="font-size: 5em;">8520亿</span>
+        </div>
+        <p style="font-size: 1.2em; opacity: 0.7; margin-top: 0.5em;">
+          复合年增长率 <span class="accent" style="font-weight: 900;">72.7%</span>
+        </p>
+        <p class="fragment fade-up dim" style="font-size: 0.7em; margin-top: 1em;">
+          IDC 预测 2025–2028 · "通用底座 + 垂直模块"成为中文 AI 社区主流方向
+        </p>
+        <aside class="notes">
+          中国市场数据印证了全球趋势：AI Agent 市场将以 72.7% 的年增长率爆发。
+          中文 AI 社区也得出"通用底座 + 垂直模块"的类似结论。
+        </aside>
+      </section>
+
+      <!-- ============ Slide 22: Single Stat — ~12 tools ============ -->
+      <section data-background-color="#1a1a1a" data-transition="none">
+        <p style="font-size: 0.8em; opacity: 0.5; margin-bottom: 0.3em;">Claude Code 的全部武器</p>
+        <div class="big-number" style="margin: 0.2em 0;">~12</div>
+        <p style="font-size: 1.3em; opacity: 0.8;">个工具</p>
+        <p class="fragment fade-up" style="font-size: 0.9em; opacity: 0.6; margin-top: 1.5em; max-width: 75%; margin-left: auto; margin-right: auto;">
+          "有了 bash 和文件系统工具，Agent 就能像人类一样执行操作<br>
+          而<span class="accent">不需要为每个任务绑定专门的工具</span>"
+        </p>
+        <p class="fragment fade-up dim" style="font-size: 0.7em; margin-top: 1em;">— LangChain 生产级 Agent 分析</p>
+        <aside class="notes">
+          这个数字令人震惊：Claude Code 用了大约十几个工具就覆盖了通用自动化。
+          关键洞察：给 Agent 计算机访问权限比为每个任务绑定专门工具更有效。
+        </aside>
+      </section>
+
+      <!-- ============ Slide 23: Diagram — Composable Architecture ============ -->
+      <section data-background-color="#1a1a1a">
+        <h3 style="margin-bottom: 0.8em;">可组合专业化架构</h3>
+        <div class="diagram-stack">
+          <div class="diagram-layer top fragment fade-up" style="transition-delay: 0.4s;">
+            <div style="display: flex; justify-content: center; gap: 1em; flex-wrap: wrap;">
+              <span class="tag tag-dim">研究</span>
+              <span class="tag tag-dim">写作</span>
+              <span class="tag tag-dim">金融</span>
+              <span class="tag tag-dim">科学</span>
+              <span class="tag tag-dim">运维</span>
+            </div>
+            <p style="font-size: 0.7em; opacity: 0.5; margin-top: 0.5em;">领域应用</p>
+          </div>
+          <div class="diagram-arrow fragment fade-up" style="transition-delay: 0.3s;">↕</div>
+          <div class="diagram-layer mid fragment fade-up" style="transition-delay: 0.2s;">
+            <div style="display: flex; justify-content: center; gap: 0.8em;">
+              <span class="tag tag-orange">Skills</span>
+              <span class="tag tag-orange">MCP</span>
+              <span class="tag tag-orange">子 Agent</span>
+              <span class="tag tag-orange">Hooks</span>
+            </div>
+            <p style="font-size: 0.7em; opacity: 0.7; margin-top: 0.5em;">轻量、可移植的专业化模块</p>
+          </div>
+          <div class="diagram-arrow fragment fade-up" style="transition-delay: 0.1s;">↕</div>
+          <div class="diagram-layer engine fragment fade-up">
+            通用推理引擎
+            <p style="font-size: 0.65em; opacity: 0.7; margin-top: 0.3em; font-weight: 400;">bash · 文件系统 · 搜索 · 计算机原语</p>
+          </div>
+        </div>
+        <aside class="notes">
+          这就是正在涌现的架构：底层是强大的通用推理引擎，中间是轻量可移植的专业化模块，
+          顶层是各领域的具体应用。任何人都可以编写和分享中间层的模块。
+        </aside>
+      </section>
+
+      <!-- ============ Slide 24: Thesis — The real answer ============ -->
+      <section data-auto-animate data-background-color="#1a1a1a">
+        <h2 data-id="final-thesis" style="font-size: 2em; line-height: 1.5;">
+          范式是真实的<br>
+          但实现是<span class="accent">分层的</span>
+        </h2>
+        <div class="fragment fade-up" style="margin-top: 1.5em; font-size: 0.9em; opacity: 0.7; max-width: 80%; margin-left: auto; margin-right: auto; text-align: left;">
+          <p>✓ 方向性论点成立 — 通用 Agent 正在取代许多专业化系统</p>
+          <p style="margin-top: 0.5em;">✓ 但不是"纯通用"也不是"纯专业化"</p>
+          <p style="margin-top: 0.5em;">✓ 而是<span class="accent">可组合技术栈</span> — 通用引擎 + 轻量专业化模块</p>
+        </div>
+        <aside class="notes">
+          最终结论：通用 Agent 范式是真实的，但最终形态不是纯粹的通用主义。
+          它是一个可组合技术栈——通用推理引擎与轻量专业化模块的结合。
+        </aside>
+      </section>
+
+      <!-- ============ Slide 25: Closing ============ -->
+      <section data-background-gradient="linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 50%, #1a1a1a 100%)">
+        <p style="font-size: 1em; opacity: 0.5;">回到开头的问题</p>
+        <h2 style="font-size: 1.6em; line-height: 1.6; margin-top: 0.8em;">
+          Nadella 和 LeCun 谁对了？<br><br>
+          <span class="fragment" style="opacity: 0.6; font-size: 0.85em;">两个人都对了一半——</span><br>
+          <span class="fragment accent" style="font-weight: 900; font-size: 1.1em;">
+            给 Agent 一台计算机<br>
+            再给它可组合的专业化
+          </span>
+        </h2>
+        <p class="fragment fade-up" style="font-size: 0.7em; opacity: 0.3; margin-top: 2em;">
+          这是截至 2026 年初的最先进水平 · 新手与专家的差距是巨大的
+        </p>
+        <aside class="notes">
+          回应开场的对立：两个人都对了一半。真正的答案是一个可组合技术栈。
+          通用推理引擎 + 轻量专业化模块 = 新范式。掌握这一范式需要严格的实践。
+        </aside>
+      </section>
+
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/reveal.js@5/dist/reveal.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/reveal.js@5/plugin/notes/notes.js"></script>
+  <script>
+    Reveal.initialize({
+      hash: true,
+      transition: 'slide',
+      transitionSpeed: 'fast',
+      backgroundTransition: 'fade',
+      autoAnimateDuration: 0.5,
+      autoAnimateEasing: 'ease',
+      width: 1920,
+      height: 1080,
+      margin: 0.04,
+      center: true,
+      controls: true,
+      progress: true,
+      plugins: [RevealNotes]
+    });
+  </script>
+</body>
+</html>
