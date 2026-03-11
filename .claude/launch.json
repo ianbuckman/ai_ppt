@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "slidev-tsmc",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["slidev", "projects/tsmc/slidev/slides.md"],
+      "port": 3030
+    }
+  ]
+}
