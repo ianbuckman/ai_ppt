@@ -1,6 +1,6 @@
 # AI-PPT 项目规则
 
-将文章/文档转换为专业演示文稿的 Claude Code skill 系统。主 skill `ai-ppt` 编排 6 个子 skill（style、image、revealjs、slidev、html、extract）完成 4 阶段工作流。
+将文章/文档转换为专业演示文稿的 Claude Code skill 系统。主 skill `ai-ppt` 编排子 skill（style、image、revealjs、extract）通过 Reveal.js 生成单文件 HTML 演示文稿。
 
 ## 关键规则（CRITICAL）
 
@@ -54,14 +54,12 @@
 
 ### Reference 加载
 
-- **生成前必须加载对应框架的 reference 文件** — revealjs-syntax.md / slidev-syntax.md / html-template.md + viewport-base.css。这些包含经过测试的精确代码模式。
+- **生成前必须加载 reference 文件** — revealjs-syntax.md + viewport-base.css。这些包含经过测试的精确代码模式。
 - **中文内容加载 chinese-typography.md** — 包含字体栈、间距、标点等完整规则。
 
-### 框架特定
+### Reveal.js 特定
 
-- **Reveal.js：viewport-base.css MUST be included**
-- **Pure HTML：viewport-base.css MUST be included + html-template.md 的完整模板**
-- **SlideDev：图片放 public/ 目录**
+- **viewport-base.css MUST be included** — 确保所有 slide 在标准视口内正确显示。
 
 ## 已知失败模式
 
