@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>风格预览 — Vintage Editorial</title>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@700;900&family=Work+Sans:wght@400;500&family=Noto+Sans+SC:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: #f5f3ee;
+      --bg-secondary: #ece9e1;
+      --text-primary: #1a1a1a;
+      --text-secondary: #555555;
+      --accent: #c87941;
+      --accent-warm: #e8d4c0;
+      --accent-glow: rgba(200, 121, 65, 0.2);
+
+      --font-display: "Fraunces", "Noto Sans SC", serif;
+      --font-body: "Work Sans", "Noto Sans SC", sans-serif;
+
+      --title-size: clamp(1.8rem, 5.5vw, 4.5rem);
+      --h2-size: clamp(1.4rem, 4vw, 3rem);
+      --h3-size: clamp(1rem, 2.5vw, 1.75rem);
+      --body-size: clamp(0.75rem, 1.5vw, 1.125rem);
+      --small-size: clamp(0.65rem, 1vw, 0.875rem);
+
+      --slide-padding: clamp(1.5rem, 5vw, 5rem);
+      --content-gap: clamp(0.5rem, 2vw, 2rem);
+
+      --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+      --duration-normal: 0.8s;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { height: 100%; overflow-x: hidden; }
+    html { scroll-snap-type: y mandatory; scroll-behavior: smooth; }
+
+    body {
+      background-color: var(--bg-primary);
+      color: var(--text-primary);
+      font-family: var(--font-body);
+      font-size: var(--body-size);
+      line-height: 1.8;
+      letter-spacing: 0.03em;
+    }
+
+    .slide {
+      width: 100vw; height: 100vh; height: 100dvh;
+      overflow: hidden; scroll-snap-align: start;
+      display: flex; flex-direction: column; position: relative;
+    }
+
+    .slide-content {
+      flex: 1; display: flex; flex-direction: column;
+      justify-content: center; align-items: center; text-align: center;
+      max-height: 100%; overflow: hidden; padding: var(--slide-padding);
+    }
+    .slide-content.left-align { align-items: flex-start; text-align: left; }
+
+    h1 { font-family: var(--font-display); font-size: var(--title-size); font-weight: 900; letter-spacing: 0.02em; line-height: 1.2; }
+    h2 { font-family: var(--font-display); font-size: var(--h2-size); font-weight: 700; letter-spacing: 0.02em; margin-bottom: var(--content-gap); }
+    h3 { font-family: var(--font-display); font-size: var(--h3-size); font-weight: 700; }
+    p  { font-size: var(--body-size); color: var(--text-secondary); line-height: 1.8; max-width: 700px; }
+    em { font-style: normal; font-weight: 700; color: var(--accent); }
+
+    /* Editorial: staggered text reveals */
+    .reveal {
+      opacity: 0; transform: translateY(25px);
+      transition: opacity var(--duration-normal) var(--ease-out-expo),
+                  transform var(--duration-normal) var(--ease-out-expo);
+    }
+    .slide.visible .reveal { opacity: 1; transform: translateY(0); }
+    .reveal:nth-child(1) { transition-delay: 0s; }
+    .reveal:nth-child(2) { transition-delay: 0.15s; }
+    .reveal:nth-child(3) { transition-delay: 0.3s; }
+    .reveal:nth-child(4) { transition-delay: 0.45s; }
+    .reveal:nth-child(5) { transition-delay: 0.6s; }
+
+    /* ===== Layout Signature: Geometric accents + CTA boxes ===== */
+    .deco-circle {
+      position: absolute; width: 120px; height: 120px;
+      border: 3px solid var(--accent-warm); border-radius: 50%;
+      opacity: 0.3; pointer-events: none;
+    }
+    .deco-dot {
+      position: absolute; width: 12px; height: 12px;
+      background: var(--accent); border-radius: 50%;
+      opacity: 0.4; pointer-events: none;
+    }
+    .deco-line {
+      position: absolute; width: 80px; height: 3px;
+      background: var(--accent-warm); opacity: 0.4; pointer-events: none;
+    }
+
+    .cta-box {
+      border: 3px solid var(--text-primary);
+      padding: 1em 2em; display: inline-block;
+      font-family: var(--font-display); font-weight: 700;
+      font-size: var(--h3-size); margin-top: 1.5em;
+    }
+
+    .big-number {
+      font-family: var(--font-display); font-size: clamp(4rem, 15vw, 10rem);
+      font-weight: 900; color: var(--accent); line-height: 1;
+    }
+
+    blockquote {
+      font-family: var(--font-display);
+      font-size: var(--h2-size); font-style: normal; font-weight: 700;
+      border-left: none; padding: 0; text-align: center; max-width: 700px; line-height: 1.4;
+      color: var(--text-primary);
+    }
+    blockquote::before { content: '"'; font-size: 3em; color: var(--accent-warm); line-height: 0; vertical-align: -0.3em; }
+    blockquote::after { content: '"'; font-size: 3em; color: var(--accent-warm); line-height: 0; vertical-align: -0.3em; }
+    .attribution { text-align: center; opacity: 0.6; font-size: var(--small-size); margin-top: 1em; font-family: var(--font-body); }
+
+    .two-cols { display: flex; gap: clamp(1rem, 3vw, 3rem); width: 100%; max-width: 800px; }
+    .two-cols > div { flex: 1; text-align: left; }
+
+    ul { text-align: left; max-width: 700px; list-style: none; }
+    ul li { padding: 0.3em 0; }
+    ul li::before { content: "→"; color: var(--accent); margin-right: 0.5em; }
+
+    .progress-bar {
+      position: fixed; top: 0; left: 0; height: 3px;
+      background: var(--accent);
+      width: 0%; z-index: 1000; transition: width 0.3s ease;
+    }
+
+    .preview-badge {
+      position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%);
+      background: var(--accent); color: #fff;
+      padding: 0.4rem 1.2rem; border-radius: 2rem;
+      font-size: var(--small-size); font-weight: 600; z-index: 1000;
+      opacity: 0.85; pointer-events: none;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.2s !important; }
+      html { scroll-behavior: auto; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="progress-bar"></div>
+  <div class="preview-badge">Vintage Editorial · 风格预览</div>
+
+  <!-- Slide 1: Cover -->
+  <section class="slide">
+    <div class="deco-circle" style="top: 10%; right: 12%;"></div>
+    <div class="deco-dot" style="top: 30%; left: 8%;"></div>
+    <div class="deco-line" style="bottom: 20%; right: 15%;"></div>
+    <div class="slide-content">
+      <h1 class="reveal">演示文稿标题</h1>
+      <p class="reveal" style="margin-top: 0.5em;">Witty · Editorial · Personality — 复古编辑风格</p>
+      <div class="cta-box reveal">EXPLORE →</div>
+    </div>
+  </section>
+
+  <!-- Slide 2: Stat -->
+  <section class="slide" style="background: var(--bg-secondary);">
+    <div class="deco-circle" style="bottom: 15%; left: 10%;"></div>
+    <div class="slide-content">
+      <div class="big-number reveal">42%</div>
+      <p class="reveal" style="font-size: var(--h3-size);">关键数据展示效果</p>
+    </div>
+  </section>
+
+  <!-- Slide 3: Content list -->
+  <section class="slide">
+    <div class="deco-dot" style="top: 15%; right: 20%;"></div>
+    <div class="deco-line" style="top: 15%; left: 5%;"></div>
+    <div class="slide-content left-align">
+      <h2 class="reveal">内容排版预览</h2>
+      <ul>
+        <li class="reveal">第一个要点 — 展示<em>强调色</em>效果</li>
+        <li class="reveal">第二个要点 — 展示正文字体和行间距</li>
+        <li class="reveal">第三个要点 — 展示列表项的前缀装饰</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- Slide 4: Quote -->
+  <section class="slide" style="background: var(--bg-secondary);">
+    <div class="slide-content">
+      <blockquote class="reveal">好的设计是尽可能少的设计。</blockquote>
+      <p class="attribution reveal">— Dieter Rams</p>
+    </div>
+  </section>
+
+  <!-- Slide 5: Two-Column -->
+  <section class="slide">
+    <div class="deco-circle" style="top: 8%; left: 5%; width: 80px; height: 80px;"></div>
+    <div class="slide-content">
+      <h2 class="reveal">对比布局预览</h2>
+      <div class="two-cols reveal">
+        <div style="border-top: 3px solid var(--accent); padding-top: 1em;">
+          <h3 style="color: var(--accent);">方案 A</h3>
+          <ul><li>优势一</li><li>优势二</li></ul>
+        </div>
+        <div style="border-top: 3px solid var(--accent-warm); padding-top: 1em;">
+          <h3 style="color: var(--text-secondary);">方案 B</h3>
+          <ul><li>优势一</li><li>优势二</li></ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    const slides = document.querySelectorAll('.slide');
+    let current = 0;
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          current = Array.from(slides).indexOf(entry.target);
+          document.querySelector('.progress-bar').style.width = ((current + 1) / slides.length * 100) + '%';
+        }
+      });
+    }, { threshold: 0.5 });
+    slides.forEach(s => observer.observe(s));
+    let lastScroll = 0;
+    const go = (dir) => { current = Math.max(0, Math.min(slides.length - 1, current + dir)); slides[current].scrollIntoView({ behavior: 'smooth' }); };
+    document.addEventListener('keydown', (e) => {
+      if (['ArrowRight', ' ', 'PageDown'].includes(e.key)) { e.preventDefault(); go(1); }
+      if (['ArrowLeft', 'PageUp'].includes(e.key)) { e.preventDefault(); go(-1); }
+    });
+    document.addEventListener('wheel', (e) => { e.preventDefault(); const now = Date.now(); if (now - lastScroll < 800) return; lastScroll = now; go(e.deltaY > 0 ? 1 : -1); }, { passive: false });
+  </script>
+</body>
+</html>
