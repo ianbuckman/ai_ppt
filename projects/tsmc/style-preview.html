@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>风格预览 — Retro Editorial</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,600;1,400&family=VT323&family=Noto+Serif+SC:wght@400;700&family=Noto+Sans+SC:wght@400;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg-primary: #f4f1e6;
+      --bg-secondary: #E0DCCF;
+      --bg-dark: #222529;
+      --text-primary: #0f0f0f;
+      --text-secondary: #555;
+      --accent: #2B6CB0;
+      --accent-orange: #C05621;
+      --accent-glow: rgba(43, 108, 176, 0.15);
+
+      --font-display: "EB Garamond", "Noto Serif SC", serif;
+      --font-body: "EB Garamond", "Noto Sans SC", serif;
+      --font-mono: "VT323", "Noto Sans SC", monospace;
+
+      --title-size: clamp(2rem, 5vw, 4rem);
+      --h2-size: clamp(1.5rem, 3.5vw, 2.5rem);
+      --h3-size: clamp(1.1rem, 2.5vw, 1.75rem);
+      --body-size: clamp(0.85rem, 1.5vw, 1.2rem);
+      --small-size: clamp(0.7rem, 1vw, 0.9rem);
+
+      --slide-padding: clamp(2rem, 5vw, 5rem);
+      --content-gap: clamp(0.75rem, 2vw, 2rem);
+
+      --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+      --duration-normal: 0.8s;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { height: 100%; overflow-x: hidden; }
+    html { scroll-snap-type: y mandatory; scroll-behavior: smooth; }
+
+    body {
+      background-color: var(--bg-primary);
+      color: var(--text-primary);
+      font-family: var(--font-body);
+      font-size: var(--body-size);
+      line-height: 1.8;
+      letter-spacing: 0.05em;
+    }
+
+    .slide {
+      width: 100vw; height: 100vh; height: 100dvh;
+      overflow: hidden; scroll-snap-align: start;
+      display: flex; flex-direction: column; position: relative;
+    }
+
+    .slide-content {
+      flex: 1; display: flex; flex-direction: column;
+      justify-content: center; align-items: center; text-align: center;
+      max-height: 100%; overflow: hidden; padding: var(--slide-padding);
+    }
+    .slide-content.left-align { align-items: flex-start; text-align: left; }
+
+    h1 {
+      font-family: var(--font-display);
+      font-size: var(--title-size);
+      font-weight: 400;
+      letter-spacing: -0.02em;
+      line-height: 1.15;
+    }
+    h2 {
+      font-family: var(--font-display);
+      font-size: var(--h2-size);
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      margin-bottom: var(--content-gap);
+    }
+    h3 {
+      font-family: var(--font-display);
+      font-size: var(--h3-size);
+      font-weight: 600;
+    }
+    p {
+      font-size: var(--body-size);
+      color: var(--text-secondary);
+      line-height: 1.8;
+      max-width: 700px;
+    }
+    em { font-style: normal; font-weight: 700; color: var(--accent); }
+
+    /* Editorial decorative line */
+    .editorial-line {
+      width: 60px;
+      height: 2px;
+      background: var(--accent);
+      margin: 1.5rem auto;
+    }
+    .editorial-line.left { margin: 1.5rem 0; }
+
+    /* Thin top rule on slides */
+    .slide::before {
+      content: '';
+      position: absolute;
+      top: 0; left: var(--slide-padding); right: var(--slide-padding);
+      height: 1px;
+      background: rgba(15, 15, 15, 0.1);
+    }
+
+    /* Slide number */
+    .slide-num {
+      position: absolute;
+      top: var(--slide-padding);
+      right: var(--slide-padding);
+      font-family: var(--font-mono);
+      font-size: clamp(0.8rem, 1.2vw, 1rem);
+      color: var(--text-secondary);
+      opacity: 0.4;
+    }
+
+    .reveal {
+      opacity: 0; transform: translateY(20px);
+      transition: opacity var(--duration-normal) var(--ease-out-expo),
+                  transform var(--duration-normal) var(--ease-out-expo);
+    }
+    .slide.visible .reveal { opacity: 1; transform: translateY(0); }
+    .reveal:nth-child(1) { transition-delay: 0.1s; }
+    .reveal:nth-child(2) { transition-delay: 0.25s; }
+    .reveal:nth-child(3) { transition-delay: 0.4s; }
+    .reveal:nth-child(4) { transition-delay: 0.55s; }
+    .reveal:nth-child(5) { transition-delay: 0.7s; }
+
+    .big-number {
+      font-family: var(--font-mono);
+      font-size: clamp(5rem, 18vw, 12rem);
+      font-weight: 400;
+      color: var(--accent);
+      line-height: 1;
+      letter-spacing: -0.02em;
+    }
+
+    blockquote {
+      font-family: var(--font-display);
+      font-size: var(--h3-size);
+      font-style: normal;
+      font-weight: 400;
+      border-left: 3px solid var(--accent);
+      padding: 0.5em 1.5em;
+      text-align: left;
+      max-width: 700px;
+      line-height: 1.8;
+      color: var(--text-primary);
+    }
+    .attribution {
+      text-align: right;
+      opacity: 0.5;
+      font-size: var(--small-size);
+      margin-top: 1em;
+      font-family: var(--font-mono);
+      max-width: 700px;
+    }
+
+    .two-cols {
+      display: flex;
+      gap: clamp(2rem, 4vw, 4rem);
+      width: 100%;
+      max-width: 900px;
+    }
+    .two-cols > div { flex: 1; text-align: left; }
+    .two-cols h3 { margin-bottom: 0.75rem; }
+
+    ul { text-align: left; max-width: 700px; list-style: none; }
+    ul li { padding: 0.4em 0; }
+    ul li::before {
+      content: "—";
+      color: var(--accent-orange);
+      margin-right: 0.75em;
+      font-weight: 600;
+    }
+
+    /* Dark slide variant (for contrast) */
+    .slide.dark {
+      background: var(--bg-dark);
+      color: #E0DCCF;
+    }
+    .slide.dark p { color: #A09C8F; }
+    .slide.dark h1, .slide.dark h2 { color: #f4f1e6; }
+    .slide.dark .big-number { color: var(--accent-orange); }
+    .slide.dark .slide-num { color: #A09C8F; }
+    .slide.dark::before { background: rgba(255,255,255,0.08); }
+    .slide.dark blockquote { border-left-color: var(--accent-orange); color: #E0DCCF; }
+    .slide.dark .attribution { color: #A09C8F; }
+
+    /* Subtitle mono tag */
+    .mono-tag {
+      font-family: var(--font-mono);
+      font-size: var(--small-size);
+      color: var(--text-secondary);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      opacity: 0.6;
+    }
+
+    /* CRT-style terminal box for data emphasis */
+    .terminal-box {
+      background: var(--bg-dark);
+      color: #f4f1e6;
+      font-family: var(--font-mono);
+      padding: 1.5rem 2rem;
+      border-radius: 4px;
+      font-size: clamp(0.9rem, 1.5vw, 1.2rem);
+      line-height: 1.6;
+      max-width: 600px;
+      box-shadow: inset 0 0 30px rgba(0,0,0,0.3);
+      position: relative;
+    }
+    .terminal-box::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: linear-gradient(rgba(18,16,16,0) 50%, rgba(0,0,0,0.1) 50%);
+      background-size: 100% 3px;
+      pointer-events: none;
+      border-radius: 4px;
+    }
+    .terminal-box .accent { color: #2B6CB0; }
+    .terminal-box .orange { color: #C05621; }
+
+    .progress-bar {
+      position: fixed; top: 0; left: 0; height: 3px;
+      background: linear-gradient(90deg, var(--accent), var(--accent-orange));
+      width: 0%; z-index: 1000; transition: width 0.3s ease;
+    }
+
+    .preview-badge {
+      position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%);
+      background: var(--bg-dark); color: var(--bg-primary);
+      padding: 0.5rem 1.5rem; border-radius: 2rem;
+      font-size: var(--small-size); font-family: var(--font-mono);
+      z-index: 1000; opacity: 0.75; pointer-events: none;
+      letter-spacing: 0.05em;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.2s !important; }
+      html { scroll-behavior: auto; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="progress-bar"></div>
+  <div class="preview-badge">Retro Editorial · 风格预览</div>
+
+  <!-- Slide 1: Cover -->
+  <section class="slide">
+    <span class="slide-num">01 / 05</span>
+    <div class="slide-content">
+      <p class="mono-tag reveal">TSMC 系列 · 第一篇</p>
+      <h1 class="reveal" style="margin-top: 1rem;">张忠谋和他的台积电<br>如何改变了整个芯片世界</h1>
+      <div class="editorial-line reveal"></div>
+      <p class="reveal">张忠谋、台积电与芯片产业的全景图</p>
+    </div>
+  </section>
+
+  <!-- Slide 2: Stat (dark variant) -->
+  <section class="slide dark">
+    <span class="slide-num">02 / 05</span>
+    <div class="slide-content">
+      <div class="big-number reveal">72%</div>
+      <p class="reveal" style="font-size: var(--h3-size); font-family: var(--font-display); color: #E0DCCF;">全球晶圆代工市场份额</p>
+      <p class="reveal" style="font-size: var(--small-size); opacity: 0.4; font-family: var(--font-mono);">先进制程领域接近垄断 · 2025</p>
+    </div>
+  </section>
+
+  <!-- Slide 3: Content list -->
+  <section class="slide">
+    <span class="slide-num">03 / 05</span>
+    <div class="slide-content left-align">
+      <h2 class="reveal">一颗芯片的诞生</h2>
+      <div class="editorial-line left reveal"></div>
+      <ul>
+        <li class="reveal"><em>设计</em> — 英伟达、苹果、AMD 只画图纸</li>
+        <li class="reveal"><em>制造</em> — 台积电把图纸变成实体芯片</li>
+        <li class="reveal"><em>封装测试</em> — 装外壳、焊引脚</li>
+        <li class="reveal"><em>终端产品</em> — 走进你的手机和电脑</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- Slide 4: Quote (dark variant) -->
+  <section class="slide dark">
+    <span class="slide-num">04 / 05</span>
+    <div class="slide-content">
+      <blockquote class="reveal">"真男人要有自己的工厂。"</blockquote>
+      <p class="attribution reveal">— AMD 时任 CEO · Real men have fabs</p>
+    </div>
+  </section>
+
+  <!-- Slide 5: Two-Column comparison -->
+  <section class="slide">
+    <span class="slide-num">05 / 05</span>
+    <div class="slide-content">
+      <h2 class="reveal">IDM 模式 vs 纯代工模式</h2>
+      <div class="editorial-line reveal"></div>
+      <div class="two-cols reveal">
+        <div>
+          <h3 style="color: var(--text-secondary);">传统 IDM</h3>
+          <ul>
+            <li>设计 + 制造全包</li>
+            <li>几亿美元建厂门槛</li>
+            <li>与客户存在竞争</li>
+          </ul>
+        </div>
+        <div>
+          <h3 style="color: var(--accent);">台积电（纯代工）</h3>
+          <ul>
+            <li>只做制造，永不设计</li>
+            <li>创业门槛降到几百万</li>
+            <li>零利益冲突</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    const slides = document.querySelectorAll('.slide');
+    let current = 0;
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          current = Array.from(slides).indexOf(entry.target);
+          document.querySelector('.progress-bar').style.width =
+            ((current + 1) / slides.length * 100) + '%';
+        }
+      });
+    }, { threshold: 0.5 });
+    slides.forEach(s => observer.observe(s));
+
+    let lastScroll = 0;
+    const go = (dir) => {
+      current = Math.max(0, Math.min(slides.length - 1, current + dir));
+      slides[current].scrollIntoView({ behavior: 'smooth' });
+    };
+    document.addEventListener('keydown', (e) => {
+      if (['ArrowRight', ' ', 'PageDown'].includes(e.key)) { e.preventDefault(); go(1); }
+      if (['ArrowLeft', 'PageUp'].includes(e.key)) { e.preventDefault(); go(-1); }
+    });
+    document.addEventListener('wheel', (e) => {
+      e.preventDefault();
+      const now = Date.now();
+      if (now - lastScroll < 800) return;
+      lastScroll = now;
+      go(e.deltaY > 0 ? 1 : -1);
+    }, { passive: false });
+  </script>
+</body>
+</html>
