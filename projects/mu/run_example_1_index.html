@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>以美光科技为例看存储芯片的AI重构</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5/dist/reset.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5/dist/reveal.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5/dist/theme/black.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5/plugin/highlight/monokai.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Cormorant:ital,wght@0,400;0,600;0,700&family=IBM+Plex+Sans:wght@300;400;500&family=Noto+Sans+SC:wght@300;400;700;900&family=Noto+Serif+SC:wght@400;600;700;900&display=swap');
+
+    :root {
+      /* Dark Botanical palette */
+      --bg-primary: #0f0f0f;
+      --text-primary: #e8e4df;
+      --text-secondary: #9a9590;
+      --accent-warm: #d4a574;
+      --accent-pink: #e8b4b8;
+      --accent-gold: #c9b896;
+
+      /* Reveal.js overrides */
+      --r-background-color: #0f0f0f;
+      --r-main-color: #e8e4df;
+      --r-heading-color: #e8e4df;
+      --r-link-color: var(--accent-warm);
+      --r-selection-background-color: rgba(212, 165, 116, 0.3);
+      --r-main-font: "IBM Plex Sans", "Noto Sans SC", "PingFang SC", sans-serif;
+      --r-heading-font: "Cormorant", "Noto Serif SC", "Songti SC", serif;
+      --r-main-font-size: 32px;
+      --r-heading-line-height: 1.3;
+      --r-block-margin: 20px;
+
+      /* Animation */
+      --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .reveal {
+      line-height: 1.8;
+      letter-spacing: 0.05em;
+    }
+
+    .reveal h1, .reveal h2, .reveal h3 {
+      letter-spacing: 0.08em;
+      font-weight: 600;
+      text-shadow: none;
+    }
+
+    .reveal h1 { font-size: clamp(1.8em, 4vw, 2.5em); }
+    .reveal h2 { font-size: clamp(1.4em, 3vw, 2em); }
+    .reveal h3 { font-size: clamp(1.1em, 2vw, 1.4em); }
+
+    /* Chinese typography: never italic */
+    .reveal blockquote { font-style: normal; }
+    em { font-style: normal; font-weight: 700; color: var(--accent-warm); }
+
+    .reveal ul li, .reveal ol li {
+      margin-bottom: 0.6em;
+      line-height: 1.8;
+    }
+
+    /* Accent utilities */
+    .accent { color: var(--accent-warm); }
+    .accent-gold { color: var(--accent-gold); }
+    .accent-pink { color: var(--accent-pink); }
+    .text-secondary { color: var(--text-secondary); }
+
+    /* Big number for stat slides */
+    .big-number {
+      font-family: "Cormorant", "Noto Serif SC", serif;
+      font-size: clamp(4em, 12vw, 8em);
+      font-weight: 700;
+      line-height: 1;
+      color: var(--accent-warm);
+    }
+
+    /* Section divider number */
+    .section-number {
+      font-family: "Cormorant", "Noto Serif SC", serif;
+      font-size: clamp(3em, 8vw, 5em);
+      font-weight: 700;
+      opacity: 0.2;
+      color: var(--accent-gold);
+      margin: 0;
+      line-height: 1;
+    }
+
+    /* Decorative gradient circles (Dark Botanical signature) */
+    .deco-tl::before {
+      content: '';
+      position: absolute;
+      width: 400px;
+      height: 400px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(212, 165, 116, 0.06) 0%, transparent 70%);
+      top: -150px;
+      right: -100px;
+      pointer-events: none;
+      filter: blur(60px);
+    }
+
+    .deco-br::after {
+      content: '';
+      position: absolute;
+      width: 350px;
+      height: 350px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(232, 180, 184, 0.05) 0%, transparent 70%);
+      bottom: -120px;
+      left: -80px;
+      pointer-events: none;
+      filter: blur(50px);
+    }
+
+    /* Thin accent line left border */
+    .accent-line {
+      border-left: 2px solid rgba(212, 165, 116, 0.3);
+      padding-left: 1.5em;
+    }
+
+    /* Quote styling */
+    .reveal blockquote {
+      border-left: 3px solid var(--accent-warm);
+      padding: 0.8em 1.2em;
+      background: rgba(212, 165, 116, 0.05);
+      border-radius: 0 8px 8px 0;
+      font-size: 1.15em;
+      text-align: left;
+      width: 85%;
+      margin: 0 auto;
+    }
+
+    /* Table styling */
+    .reveal table {
+      border-collapse: collapse;
+      width: 90%;
+      margin: 1em auto;
+    }
+    .reveal table th {
+      color: var(--accent-warm);
+      border-bottom: 2px solid rgba(212, 165, 116, 0.3);
+      padding: 0.6em 0.8em;
+      font-weight: 600;
+    }
+    .reveal table td {
+      padding: 0.5em 0.8em;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    /* Two-column layout */
+    .two-cols {
+      display: flex;
+      gap: 2.5em;
+      align-items: center;
+      margin-top: 1em;
+    }
+    .two-cols > div { flex: 1; text-align: left; }
+
+    /* Image styles */
+    .slide-img {
+      max-height: 55vh;
+      object-fit: contain;
+      border-radius: 8px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    }
+
+    /* Highlight box */
+    .hl-box {
+      display: inline-block;
+      padding: 0.5em 0.8em;
+      background: rgba(212, 165, 116, 0.08);
+      border: 1px solid rgba(212, 165, 116, 0.15);
+      border-radius: 8px;
+    }
+
+    /* Card with left border accent */
+    .card {
+      padding: 0.8em 1em;
+      border-radius: 8px;
+      text-align: left;
+    }
+    .card-warm { background: rgba(212, 165, 116, 0.05); border-left: 3px solid var(--accent-warm); }
+    .card-gold { background: rgba(201, 184, 150, 0.05); border-left: 3px solid var(--accent-gold); }
+    .card-pink { background: rgba(232, 180, 184, 0.05); border-left: 3px solid var(--accent-pink); }
+
+    /* Progress bar + controls */
+    .reveal .progress span { background: var(--accent-warm); }
+    .reveal .controls { color: var(--accent-warm); }
+
+    /* Reduced motion */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.2s !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="reveal">
+    <div class="slides">
+
+      <!-- ==================== Slide 1: Cover ==================== -->
+      <section data-background-image="images/img.png" data-background-size="cover" data-background-opacity="0.2">
+        <div style="position: relative; z-index: 1;">
+          <p style="font-size: 0.75em; color: var(--accent-warm); letter-spacing: 0.25em; margin-bottom: 0.8em;">
+            投 资 分 析
+          </p>
+          <h1 style="font-size: clamp(1.6em, 4vw, 2.3em); line-height: 1.5; margin-bottom: 0.2em;">
+            以美光科技为例看<br>存储芯片的<span class="accent">AI重构</span>
+          </h1>
+          <p style="font-size: 1em; color: var(--text-secondary); margin-top: 1.2em;">
+            为什么基金都在增持美光？
+          </p>
+          <div style="margin-top: 3em; font-size: 0.6em; color: var(--text-secondary); opacity: 0.5;">
+            基于 Micron FY2026 Q1 财报 · 2025年12月
+          </div>
+        </div>
+        <aside class="notes">
+          开篇引入：多个科技基金纷纷增持美光。这家曾经的"周期股"正在经历历史上最大的转型。
+        </aside>
+      </section>
+
+      <!-- ==================== Slide 2: Single Stat — 136亿 ==================== -->
+      <section data-auto-animate data-auto-animate-duration="1.2">
+        <div class="big-number" data-id="revenue">$136亿</div>
+        <p style="font-size: 1.2em; margin-top: 0.3em;">创纪录季度营收</p>
+        <div style="display: flex; justify-content: center; gap: 3em; margin-top: 1.8em;">
+          <div class="fragment fade-up">
+            <span style="font-size: 2.2em; font-weight: 700; color: var(--accent-warm);">+57%</span>
+            <p class="text-secondary" style="font-size: 0.75em;">同比增长</p>
+          </div>
+          <div class="fragment fade-up">
+            <span style="font-size: 2.2em; font-weight: 700; color: var(--accent-gold);">56%</span>
+            <p class="text-secondary" style="font-size: 0.75em;">毛利率</p>
+          </div>
+        </div>
+        <aside class="notes">
+          2025年12月17日，美光发布FY2026 Q1财报。数字令人瞩目。
+          这不是普通的周期性反弹——背后是AI需求的结构性增长。
+        </aside>
+      </section>
+
+      <!-- ==================== Slide 3: Quote — CEO ==================== -->
+      <section data-transition="fade">
+        <blockquote>
+          "公司已经完成了2026年全年HBM产能的价格和数量协议，包括行业领先的HBM4产品。"
+        </blockquote>
+        <p style="text-align: right; width: 85%; margin: 0.8em auto 0; opacity: 0.6; font-size: 0.8em;">
+          — Sanjay Mehrotra，美光科技 CEO
+        </p>
+        <p class="fragment fade-up text-secondary" style="margin-top: 2em; font-size: 0.85em;">
+          提前锁定一整年的订单和利润<br>
+          在存储芯片行业的历史上几乎<span class="accent">前所未有</span>
+        </p>
+      </section>
+
+      <!-- ==================== Slide 4: Thesis ==================== -->
+      <section data-auto-animate data-auto-animate-duration="1.5">
+        <h2 data-id="thesis" style="font-size: clamp(1.5em, 3.5vw, 2.2em); line-height: 1.7; max-width: 16em; margin: 0 auto;">
+          存储芯片正在从<span class="accent">大宗商品</span><br>
+          变成AI时代的<span class="accent">战略物资</span>
+        </h2>
+        <p class="fragment fade-up text-secondary" style="margin-top: 1.5em; font-size: 0.9em;">
+          美光正站在这场变革的中心
+        </p>
+        <aside class="notes">
+          这是本次演讲的核心论点。接下来从行业变化、增长引擎、竞争格局三个维度展开。
+        </aside>
+      </section>
+
+      <!-- ==================== Slide 5: Section Divider — 01 ==================== -->
+      <section data-background-gradient="linear-gradient(135deg, rgba(212,165,116,0.08) 0%, #0f0f0f 50%, rgba(201,184,150,0.05) 100%)" data-transition="fade">
+        <p class="section-number">01</p>
+        <h2 style="margin-top: -0.2em; font-size: 2.2em;">行业之变</h2>
+        <p class="text-secondary" style="font-size: 0.9em;">从大宗商品到AI战略物资</p>
+      </section>
+
+      <!-- ==================== Slide 6: Bullet List — 旧世界 ==================== -->
+      <section class="deco-tl">
+        <h3 style="color: var(--accent-warm);">存储芯片的"旧世界"</h3>
+        <div style="text-align: left; max-width: 780px; margin: 1.2em auto 0;">
+          <div class="fragment fade-up accent-line" style="margin-bottom: 1.2em;">
+            <strong>可替代性</strong>
+            <p class="text-secondary" style="font-size: 0.8em; margin: 0.2em 0 0;">
+              各厂商DRAM遵循JEDEC统一标准，买方只看价格
+            </p>
+          </div>
+          <div class="fragment fade-up accent-line" style="margin-bottom: 1.2em;">
+            <strong>高固定成本</strong>
+            <p class="text-secondary" style="font-size: 0.8em; margin: 0.2em 0 0;">
+              建造一座先进工厂需投入100亿美元以上
+            </p>
+          </div>
+          <div class="fragment fade-up accent-line" style="margin-bottom: 1.2em;">
+            <strong>漫长调整周期</strong>
+            <p class="text-secondary" style="font-size: 0.8em; margin: 0.2em 0 0;">
+              新建工厂从动工到投产需2-3年
+            </p>
+          </div>
+          <p class="fragment fade-up" style="text-align: center; margin-top: 1.2em; color: var(--accent-pink); font-size: 0.9em;">
+            → 令人熟悉的"繁荣-萧条"周期
+          </p>
+        </div>
+      </section>
+
+      <!-- ==================== Slide 7: Highlight — AI改变规则 ==================== -->
+      <section data-transition="fade" data-background-color="#0a0a0a">
+        <p style="font-size: 1.2em; opacity: 0.5;">AI时代的到来</p>
+        <h2 class="fragment grow" style="font-size: clamp(1.8em, 4vw, 2.8em); color: var(--accent-warm); margin-top: 0.3em;">
+          彻底改变了游戏规则
+        </h2>
+        <p class="fragment fade-up text-secondary" style="margin-top: 1.5em; font-size: 0.95em;">
+          关键变量：一种叫做 <strong style="color: var(--accent-warm);">HBM</strong> 的产品
+        </p>
+      </section>
+
+      <!-- ==================== Slide 8: Two-Column — HBM技术 ==================== -->
+      <section>
+        <h3 style="color: var(--accent-warm); margin-bottom: 0.5em;">HBM：高带宽内存</h3>
+        <div class="two-cols">
+          <div style="text-align: center;">
+            <img src="images/img_1.png" class="slide-img" style="max-height: 42vh;" alt="HBM 3D堆叠示意图">
+            <p class="text-secondary" style="font-size: 0.6em; margin-top: 0.5em;">
+              3D堆叠架构：TSV · Die · Interposer
+            </p>
+          </div>
+          <div>
+            <ul style="font-size: 0.82em; list-style: none; padding: 0;">
+              <li class="fragment fade-up" style="margin-bottom: 1.1em;">
+                <span class="accent">▎</span> 通过TSV硅通孔技术<br>
+                <span class="text-secondary" style="font-size: 0.85em;">将8-16层DRAM芯片垂直堆叠</span>
+              </li>
+              <li class="fragment fade-up" style="margin-bottom: 1.1em;">
+                <span class="accent">▎</span> 远超传统DRAM的带宽<br>
+                <span class="text-secondary" style="font-size: 0.85em;">解决AI大模型的内存瓶颈</span>
+              </li>
+              <li class="fragment fade-up">
+                <span class="accent">▎</span> 从标准商品变为GPU定制配件<br>
+                <span class="text-secondary" style="font-size: 0.85em;">需与特定GPU平台深度适配</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== Slide 9: Bullet List — 三大变化 ==================== -->
+      <section class="deco-br">
+        <h3 style="color: var(--accent-warm);">三个根本性的变化</h3>
+        <div style="max-width: 780px; margin: 1.2em auto 0;">
+          <div class="fragment fade-up card card-warm" style="margin-bottom: 1em;">
+            <strong>技术壁垒飙升</strong>
+            <p class="text-secondary" style="font-size: 0.8em; margin: 0.2em 0 0;">
+              先进3D封装技术，不是任何厂商想做就能做
+            </p>
+          </div>
+          <div class="fragment fade-up card card-gold" style="margin-bottom: 1em;">
+            <strong>客户深度绑定</strong>
+            <p class="text-secondary" style="font-size: 0.8em; margin: 0.2em 0 0;">
+              每代HBM需提前1-2年与GPU平台联合开发
+            </p>
+          </div>
+          <div class="fragment fade-up card card-pink">
+            <strong>定价权转移</strong>
+            <p class="text-secondary" style="font-size: 0.8em; margin: 0.2em 0 0;">
+              供不应求，HBM4相对HBM3E溢价约50%
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== Slide 10: Section Divider — 02 ==================== -->
+      <section data-background-gradient="linear-gradient(135deg, rgba(201,184,150,0.08) 0%, #0f0f0f 50%, rgba(232,180,184,0.05) 100%)" data-transition="fade">
+        <p class="section-number">02</p>
+        <h2 style="margin-top: -0.2em; font-size: 2.2em;">增长引擎</h2>
+        <p class="text-secondary" style="font-size: 0.9em;">HBM + AI数据中心SSD</p>
+      </section>
+
+      <!-- ==================== Slide 11: Single Stat — 30× ==================== -->
+      <section data-auto-animate data-auto-animate-duration="1.2">
+        <div class="big-number" data-id="bandwidth">30×</div>
+        <p style="font-size: 1.2em; margin-top: 0.3em;">带宽碾压</p>
+        <div style="display: flex; justify-content: center; gap: 2em; margin-top: 1.5em; align-items: center;">
+          <div class="fragment fade-up hl-box">
+            <span style="font-size: 1.5em; font-weight: 700; color: var(--accent-warm);">2 TB/s</span>
+            <p class="text-secondary" style="font-size: 0.7em; margin: 0.2em 0 0;">HBM4 单堆栈</p>
+          </div>
+          <span class="text-secondary" style="font-size: 1.5em;">vs</span>
+          <div class="fragment fade-up" style="padding: 0.5em 0.8em; background: rgba(255,255,255,0.03); border-radius: 8px;">
+            <span style="font-size: 1.5em; font-weight: 700; opacity: 0.4;">50-70 GB/s</span>
+            <p class="text-secondary" style="font-size: 0.7em; margin: 0.2em 0 0;">DDR5 单条</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== Slide 12: Story — 产品演进 ==================== -->
+      <section>
+        <h3 style="color: var(--accent-warm);">美光的HBM产品线</h3>
+        <div style="text-align: left; max-width: 780px; margin: 1em auto;">
+          <div class="fragment fade-up" style="padding: 0.7em 0; border-left: 3px solid var(--accent-warm); padding-left: 1.2em; margin-bottom: 1em;">
+            <strong style="color: var(--accent-warm);">HBM3E</strong>
+            <span class="text-secondary" style="font-size: 0.8em;"> — 当前主力</span>
+            <p class="text-secondary" style="font-size: 0.78em; margin: 0.2em 0 0;">
+              功耗比竞品低30%，跳过HBM3直接采用1β制程
+            </p>
+          </div>
+          <div class="fragment fade-up" style="padding: 0.7em 0; border-left: 3px solid var(--accent-gold); padding-left: 1.2em; margin-bottom: 1em;">
+            <strong style="color: var(--accent-gold);">HBM4</strong>
+            <span class="text-secondary" style="font-size: 0.8em;"> — 2026年量产</span>
+            <p class="text-secondary" style="font-size: 0.78em; margin: 0.2em 0 0;">
+              专为NVIDIA Vera Rubin设计，2048位接口（翻倍）
+            </p>
+          </div>
+          <div class="fragment fade-up" style="padding: 0.7em 0; border-left: 3px solid var(--accent-pink); padding-left: 1.2em;">
+            <strong style="color: var(--accent-pink);">Vera Rubin 规格</strong>
+            <p class="text-secondary" style="font-size: 0.78em; margin: 0.2em 0 0;">
+              每颗GPU配288GB HBM4，8堆栈，22 TB/s 聚合带宽
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== Slide 13: Single Stat — 市场规模 ==================== -->
+      <section data-auto-animate data-auto-animate-duration="1.2">
+        <p class="text-secondary" style="font-size: 0.85em;">HBM市场规模（2025 → 2028）</p>
+        <div style="display: flex; justify-content: center; align-items: baseline; gap: 0.5em; margin-top: 0.5em;">
+          <span style="font-family: 'Cormorant', 'Noto Serif SC', serif; font-size: clamp(2em, 7vw, 4em); font-weight: 700; opacity: 0.4;">$350亿</span>
+          <span style="font-size: 2em; color: var(--accent-warm);">→</span>
+          <span class="big-number" style="font-size: clamp(2.5em, 9vw, 5.5em);">$1000亿</span>
+        </div>
+        <p style="margin-top: 0.3em; font-size: 1.1em;">
+          年复合增长率 <span class="accent" style="font-weight: 700;">~40%</span>
+        </p>
+        <p class="fragment fade-up text-secondary" style="margin-top: 1.2em; font-size: 0.78em;">
+          将超过2024年整个DRAM市场总规模 · 比一年前的预测提前了两年
+        </p>
+        <aside class="notes">
+          CEO Mehrotra 强调这个1000亿美元的HBM市场将超过2024年整个DRAM市场的总规模。
+        </aside>
+      </section>
+
+      <!-- ==================== Slide 14: Transition ==================== -->
+      <section data-transition="fade" data-background-color="#0a0a0a">
+        <h2 style="font-weight: 400; opacity: 0.7; font-size: 1.8em;">
+          不只是HBM……
+        </h2>
+      </section>
+
+      <!-- ==================== Slide 15: Bullet List — SSD场景 ==================== -->
+      <section class="deco-tl">
+        <h3 style="color: var(--accent-warm);">AI数据中心SSD三大场景</h3>
+        <div style="max-width: 820px; margin: 1.2em auto 0;">
+          <div class="fragment fade-up card card-warm" style="margin-bottom: 0.9em;">
+            <strong>模型检查点存档</strong>
+            <p class="text-secondary" style="font-size: 0.78em; margin: 0.2em 0 0;">
+              万亿参数模型单次检查点可达18TB，训练容错的关键
+            </p>
+          </div>
+          <div class="fragment fade-up card card-gold" style="margin-bottom: 0.9em;">
+            <strong>AI数据湖</strong>
+            <p class="text-secondary" style="font-size: 0.78em; margin: 0.2em 0 0;">
+              LLaMA 3 训练使用超15万亿token，6500 ION 单盘30.72TB
+            </p>
+          </div>
+          <div class="fragment fade-up card card-pink">
+            <strong>推理缓存（KV Cache 卸载）</strong>
+            <p class="text-secondary" style="font-size: 0.78em; margin: 0.2em 0 0;">
+              从SSD恢复比重新计算快14倍，长上下文推理的基础设施
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== Slide 16: Highlight — All-in AI ==================== -->
+      <section data-transition="fade" data-background-color="#0a0a0a">
+        <p style="font-size: 0.95em; opacity: 0.5;">运营29年的Crucial消费品牌</p>
+        <p class="fragment fade-in-then-semi-out" style="font-size: 1.3em; margin-top: 0.5em; text-decoration: line-through; opacity: 0.35;">
+          消费级内存和SSD
+        </p>
+        <p class="fragment grow" style="font-size: clamp(1.6em, 3.5vw, 2.4em); color: var(--accent-warm); font-weight: 700; margin-top: 0.8em;">
+          全面 All-in AI
+        </p>
+        <p class="fragment fade-up text-secondary" style="margin-top: 1.5em; font-size: 0.78em;">
+          "AI驱动的数据中心增长带来了对内存和存储的巨大需求"
+        </p>
+      </section>
+
+      <!-- ==================== Slide 17: Section Divider — 03 ==================== -->
+      <section data-background-gradient="linear-gradient(135deg, rgba(232,180,184,0.06) 0%, #0f0f0f 50%, rgba(212,165,116,0.06) 100%)" data-transition="fade">
+        <p class="section-number">03</p>
+        <h2 style="margin-top: -0.2em; font-size: 2.2em;">竞争格局</h2>
+        <p class="text-secondary" style="font-size: 0.9em;">三家厂商主导的世界</p>
+      </section>
+
+      <!-- ==================== Slide 18: Comparison Table ==================== -->
+      <section>
+        <img src="images/img_2.png" style="max-height: 10vh; object-fit: contain; margin-bottom: 0.3em; border-radius: 6px;" alt="SK Hynix, Micron, Samsung">
+        <h3 style="color: var(--accent-warm); font-size: 1.05em;">全球HBM市场份额（2025 Q2）</h3>
+        <table style="font-size: 0.72em;">
+          <thead>
+            <tr>
+              <th></th>
+              <th>SK海力士</th>
+              <th style="color: var(--accent-warm);">美光</th>
+              <th>三星</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="fragment fade-up">
+              <td class="text-secondary">市场份额</td>
+              <td><strong>62%</strong></td>
+              <td style="color: var(--accent-warm);"><strong>21%</strong></td>
+              <td>17%</td>
+            </tr>
+            <tr class="fragment fade-up">
+              <td class="text-secondary">NVIDIA关系</td>
+              <td>第一供应商</td>
+              <td style="color: var(--accent-warm);">深度绑定中</td>
+              <td>刚通过认证</td>
+            </tr>
+            <tr class="fragment fade-up">
+              <td class="text-secondary">核心优势</td>
+              <td>技术成熟度最高</td>
+              <td style="color: var(--accent-warm);">能效 + 美系身份</td>
+              <td>最大DRAM产能</td>
+            </tr>
+            <tr class="fragment fade-up">
+              <td class="text-secondary">产能状态</td>
+              <td>售罄至2026</td>
+              <td style="color: var(--accent-warm);">售罄至2026</td>
+              <td>正在追赶</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- ==================== Slide 19: Bullet List — 美光优势 ==================== -->
+      <section class="deco-br">
+        <h3 style="color: var(--accent-warm);">美光的独特竞争优势</h3>
+        <div style="text-align: left; max-width: 780px; margin: 1.2em auto 0;">
+          <div class="fragment fade-up accent-line" style="margin-bottom: 1.2em;">
+            <strong>能效领先</strong>
+            <p class="text-secondary" style="font-size: 0.8em; margin: 0.2em 0 0;">
+              HBM3E功耗低30%，为数据中心年省数亿美元电费
+            </p>
+          </div>
+          <div class="fragment fade-up accent-line" style="margin-bottom: 1.2em;">
+            <strong>美系独苗</strong>
+            <p class="text-secondary" style="font-size: 0.8em; margin: 0.2em 0 0;">
+              唯一美国存储大厂，CHIPS法案受益者，供应链安全首选
+            </p>
+          </div>
+          <div class="fragment fade-up accent-line">
+            <strong>研发制造协同</strong>
+            <p class="text-secondary" style="font-size: 0.8em; margin: 0.2em 0 0;">
+              新工厂紧邻研发中心，缩短上市时间（Time-to-Market）
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== Slide 20: Story — 三星 ==================== -->
+      <section>
+        <h3 style="color: var(--accent-pink);">三星：最大的不确定因素</h3>
+        <div style="text-align: left; max-width: 780px; margin: 1.2em auto 0;">
+          <div class="fragment fade-up" style="padding: 0.7em 0; border-left: 3px solid var(--accent-pink); padding-left: 1.2em; margin-bottom: 1em;">
+            <strong style="color: var(--accent-pink);">困境</strong>
+            <p class="text-secondary" style="font-size: 0.78em; margin: 0.2em 0 0;">
+              HBM3E发热和功耗问题，超一年未通过NVIDIA认证
+            </p>
+          </div>
+          <div class="fragment fade-up" style="padding: 0.7em 0; border-left: 3px solid var(--accent-gold); padding-left: 1.2em; margin-bottom: 1em;">
+            <strong style="color: var(--accent-gold);">转折</strong>
+            <p class="text-secondary" style="font-size: 0.78em; margin: 0.2em 0 0;">
+              2025年9月终于通过认证，重新设计DRAM核心解决热性能
+            </p>
+          </div>
+          <div class="fragment fade-up" style="padding: 0.7em 0; border-left: 3px solid var(--accent-warm); padding-left: 1.2em;">
+            <strong style="color: var(--accent-warm);">威胁</strong>
+            <p class="text-secondary" style="font-size: 0.78em; margin: 0.2em 0 0;">
+              全球最大DRAM产能，良率解决后可迅速释放HBM产能
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== Slide 21: Section Divider — 04 ==================== -->
+      <section data-background-gradient="linear-gradient(135deg, rgba(212,165,116,0.06) 0%, #0f0f0f 50%, rgba(201,184,150,0.06) 100%)" data-transition="fade">
+        <p class="section-number">04</p>
+        <h2 style="margin-top: -0.2em; font-size: 2.2em;">地缘护城河</h2>
+        <p class="text-secondary" style="font-size: 0.9em;">美国本土化战略与政策支持</p>
+      </section>
+
+      <!-- ==================== Slide 22: Single Stat — 2000亿 ==================== -->
+      <section data-auto-animate data-auto-animate-duration="1.2">
+        <div class="big-number" data-id="invest">$2000亿</div>
+        <p style="font-size: 1.1em; margin-top: 0.3em;">美国本土投资总额</p>
+        <div style="display: flex; justify-content: center; gap: 1.5em; margin-top: 1.5em; flex-wrap: wrap;">
+          <div class="fragment fade-up hl-box">
+            <span style="font-size: 1.3em; font-weight: 700; color: var(--accent-warm);">$61亿</span>
+            <p class="text-secondary" style="font-size: 0.65em; margin: 0.2em 0 0;">CHIPS法案资助</p>
+          </div>
+          <div class="fragment fade-up hl-box">
+            <span style="font-size: 1.3em; font-weight: 700; color: var(--accent-gold);">9万</span>
+            <p class="text-secondary" style="font-size: 0.65em; margin: 0.2em 0 0;">直接+间接就业</p>
+          </div>
+          <div class="fragment fade-up hl-box">
+            <span style="font-size: 1.3em; font-weight: 700; color: var(--accent-pink);">3大基地</span>
+            <p class="text-secondary" style="font-size: 0.65em; margin: 0.2em 0 0;">爱达荷 · 纽约 · 弗吉尼亚</p>
+          </div>
+        </div>
+        <p class="fragment fade-up text-secondary" style="margin-top: 1.3em; font-size: 0.72em;">
+          美国先进存储产能从不到2%提升至2035年约10%
+        </p>
+        <aside class="notes">
+          美光计划将美国本土DRAM产能占比提升至40%。
+          纽约州项目将是美国历史上最大的半导体制造设施。
+        </aside>
+      </section>
+
+      <!-- ==================== Slide 23: Transition — 风险 ==================== -->
+      <section data-transition="fade" data-background-color="#0a0a0a">
+        <h2 style="font-weight: 400; opacity: 0.7; font-size: 1.8em;">
+          但风险同样不可忽视
+        </h2>
+      </section>
+
+      <!-- ==================== Slide 24: Bullet List — 三大风险 ==================== -->
+      <section>
+        <h3 style="color: var(--accent-pink);">三大下行风险</h3>
+        <div style="max-width: 780px; margin: 1.2em auto 0;">
+          <div class="fragment fade-up card card-pink" style="margin-bottom: 0.9em;">
+            <strong>三星回归</strong>
+            <p class="text-secondary" style="font-size: 0.78em; margin: 0.2em 0 0;">
+              全球最大DRAM产能，可能大幅增加供应并引发价格战
+            </p>
+          </div>
+          <div class="fragment fade-up card card-pink" style="margin-bottom: 0.9em;">
+            <strong>技术迭代</strong>
+            <p class="text-secondary" style="font-size: 0.78em; margin: 0.2em 0 0;">
+              HBM4+需更复杂封装（混合键合），保持领先并非板上钉钉
+            </p>
+          </div>
+          <div class="fragment fade-up card card-pink">
+            <strong>估值风险</strong>
+            <p class="text-secondary" style="font-size: 0.78em; margin: 0.2em 0 0;">
+              乐观预期已计入股价，AI热潮降温或供应过剩可能导致回调
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== Slide 25: Closing ==================== -->
+      <section data-background-gradient="linear-gradient(180deg, #0f0f0f 0%, #0a0a0a 100%)" data-transition="fade">
+        <p style="font-size: 0.9em; opacity: 0.4;">一个关键问题</p>
+        <h2 style="font-size: clamp(1.3em, 3vw, 1.8em); line-height: 1.7; margin-top: 0.5em;">
+          美光能否在HBM4时代守住阵地<br>
+          抵御三星的规模反扑？
+        </h2>
+        <div class="fragment fade-up" style="margin-top: 2em;">
+          <p style="font-size: 1.1em; line-height: 1.8;">
+            <span style="opacity: 0.4;">昙花一现的周期性反弹</span>
+            <span class="accent" style="font-size: 1.2em; margin: 0 0.2em;"> 还是 </span>
+            <span style="color: var(--accent-warm); font-weight: 700;">历史性蜕变？</span>
+          </p>
+        </div>
+        <p class="fragment fade-up" style="font-size: 0.55em; opacity: 0.3; margin-top: 3em;">
+          数据来源：Micron FY2026 Q1 Earnings · Counterpoint Research · U.S. CHIPS Act · TrendForce
+        </p>
+        <aside class="notes">
+          这个问题的答案将决定美光究竟是昙花一现，还是真正完成从大宗商品到AI基础设施成长股的历史性蜕变。
+        </aside>
+      </section>
+
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/reveal.js@5/dist/reveal.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/reveal.js@5/plugin/notes/notes.js"></script>
+  <script>
+    Reveal.initialize({
+      hash: true,
+      transition: 'slide',
+      transitionSpeed: 'default',
+      backgroundTransition: 'fade',
+      autoAnimateDuration: 1.2,
+      autoAnimateEasing: 'ease',
+      width: 1920,
+      height: 1080,
+      margin: 0.04,
+      center: true,
+      controls: true,
+      progress: true,
+      plugins: [RevealNotes]
+    });
+  </script>
+</body>
+</html>

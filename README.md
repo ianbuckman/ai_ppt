@@ -164,7 +164,7 @@ npm run dev:tsmc
 npm run build:tsmc
 
 # Reveal.js 版本直接浏览器打开
-open projects/tsmc/index.html
+open projects/tsmc/run_example_1_index.html
 ```
 
 ## 项目结构
