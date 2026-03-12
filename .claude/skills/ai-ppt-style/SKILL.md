@@ -89,8 +89,9 @@ Then follow `references/custom-style-guide.md` to:
 3. Identify layout pattern
 4. Map to animation mood
 5. Determine spacing & density
-6. **Generate a style preview HTML** (`style-preview.html`) — a self-contained page with 5 sample slides (cover, stat, content list, quote, two-column) that apply the extracted style so the user can see the actual visual effect in their browser
-7. **Do NOT present for confirmation yet** — proceed to Step 1c for side-by-side comparison
+6. Extract Signature CSS — 3-5 signature CSS techniques from the reference (multi-layer gradients, text effects, glassmorphism, decorative elements, animation keyframes)
+7. **Generate a style preview HTML** (`style-preview.html`) — a self-contained page with 5 sample slides (cover, stat, content list, quote, two-column) that apply the extracted style including Signature CSS so the user can see the actual visual effect in their browser
+8. **Do NOT present for confirmation yet** — proceed to Step 1c for side-by-side comparison
 
 ### Preset Name → Preview File Mapping
 
@@ -131,6 +132,7 @@ Then present the extracted style summary and use AskUserQuestion:
 📝 字体：[Display font] + [Body font]
 📐 布局：[Layout pattern]
 🎬 动画：[Mood name]
+✨ 特效：[N] 个签名 CSS 技法（[brief list, e.g. 渐变背景、玻璃拟态、浮动动画]）
 
 已在浏览器中打开自定义风格预览和 3 个相近的预设风格，请对比查看：
 
@@ -218,7 +220,7 @@ Ask: "这个结构可以吗？需要调整哪里？" (Unless the user said "直�
 ## Output
 
 After this sub-skill completes, the main orchestrator has:
-1. A chosen style preset (with CSS variables, fonts, layout signature)
+1. A chosen style preset with CSS variables, fonts, layout signature, and signature CSS blocks (if custom)
 2. An animation mood with specific duration/easing settings
 3. A confirmed slide sequence with types and messages
 4. Everything needed to invoke the appropriate framework generator sub-skill

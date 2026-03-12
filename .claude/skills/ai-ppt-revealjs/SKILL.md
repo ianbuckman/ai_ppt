@@ -43,6 +43,28 @@ Override Reveal.js theme variables with the selected preset:
 }
 ```
 
+## Signature CSS Integration (Custom Styles)
+
+When the style preset includes Signature CSS blocks (from custom style extraction), inject them into the `<style>` tag after the `:root` variables. These blocks carry the design's visual personality that cannot be expressed through variables alone.
+
+**Selector mapping** — preview selectors must be adapted to Reveal.js structure:
+
+| Preview Selector | Reveal.js Equivalent |
+|-----------------|---------------------|
+| `.slide` background | `section` background or `data-background-*` attribute |
+| `.glass-card`, `.neon-card` | Custom `<div>` classes inside `<section>` |
+| `h1`, `h2` text effects | `.reveal .slides h1`, `.reveal .slides h2` |
+| `.bg-grid::before` | `section::before` with `position: absolute; inset: 0; pointer-events: none; z-index: 0` |
+| `@keyframes` | Global `<style>` block (no scoping needed) |
+
+**Scoping rule**: Prefix signature CSS selectors with `.reveal .slides` for specificity over the base Reveal.js theme. Example: `.reveal .slides .glass-card { ... }`.
+
+**Decorative elements**: Use HTML `<div>` children with `position: absolute` inside `<section>` rather than pseudo-elements, since slides may need multiple decorative layers and pseudo-elements are limited to `::before`/`::after`.
+
+**Background patterns**: Apply via inline `style` on `<section>` or via `section::before` pseudo-element with `position: absolute; inset: 0; pointer-events: none` to avoid interfering with content interaction.
+
+**Content z-index**: Ensure slide content sits above decorative layers — wrap content in a `<div style="position: relative; z-index: 1">`.
+
 ## Image Placement (Reveal.js)
 
 When images were kept in the Phase 1 image audit:
