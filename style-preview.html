@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>风格预览 — Glass Monolith v2</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Noto+Sans+SC:wght@300;400;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg-primary: #1e1f22;
+      --bg-secondary: #2a2b2f;
+      --bg-mid: #383a40;
+      --text-primary: #f4f5f6;
+      --text-secondary: #9ea3aa;
+      --accent: #d1d3d6;
+      --accent-glow: rgba(209, 211, 214, 0.25);
+      /* More transparent glass */
+      --glass-bg: rgba(255, 255, 255, 0.06);
+      --glass-border: rgba(255, 255, 255, 0.12);
+      --glass-highlight: rgba(255, 255, 255, 0.2);
+
+      --font-display: 'Inter', 'Noto Sans SC', -apple-system, sans-serif;
+      --font-body: 'Inter', 'Noto Sans SC', -apple-system, sans-serif;
+
+      --title-size: clamp(1.8rem, 5vw, 3.5rem);
+      --h2-size: clamp(1.3rem, 3.5vw, 2.2rem);
+      --h3-size: clamp(1rem, 2.5vw, 1.5rem);
+      --body-size: clamp(0.8rem, 1.5vw, 1.1rem);
+      --small-size: clamp(0.65rem, 1vw, 0.85rem);
+
+      --slide-padding: clamp(2rem, 6vw, 6rem);
+      --content-gap: clamp(0.8rem, 2vw, 2rem);
+
+      --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+      --ease-out-back: cubic-bezier(0.34, 1.56, 0.64, 1);
+      --duration-normal: 1s;
+
+      --radius-panel: 24px;
+      --radius-card: 20px;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; -webkit-font-smoothing: antialiased; }
+    html, body { height: 100%; overflow-x: hidden; }
+    html { scroll-snap-type: y mandatory; scroll-behavior: smooth; }
+
+    body {
+      background-color: var(--bg-primary);
+      background-image:
+        radial-gradient(circle at 0% 0%, var(--bg-mid) 0%, transparent 50%),
+        radial-gradient(circle at 100% 100%, var(--bg-mid) 0%, transparent 50%),
+        linear-gradient(135deg, var(--bg-primary) 0%, #111113 100%);
+      color: var(--text-primary);
+      font-family: var(--font-body);
+      font-size: var(--body-size);
+      line-height: 1.8;
+      letter-spacing: 0.05em;
+    }
+
+    .slide {
+      width: 100vw; height: 100vh; height: 100dvh;
+      overflow: hidden; scroll-snap-align: start;
+      display: flex; flex-direction: column; position: relative;
+      background:
+        radial-gradient(circle at 0% 0%, var(--bg-mid) 0%, transparent 50%),
+        radial-gradient(circle at 100% 100%, var(--bg-mid) 0%, transparent 50%),
+        linear-gradient(135deg, var(--bg-primary) 0%, #111113 100%);
+    }
+
+    .slide-content {
+      flex: 1; display: flex; flex-direction: column;
+      justify-content: center; align-items: center; text-align: center;
+      max-height: 100%; overflow: hidden; padding: var(--slide-padding);
+    }
+    .slide-content.left-align { align-items: flex-start; text-align: left; }
+
+    h1 {
+      font-family: var(--font-display);
+      font-size: var(--title-size);
+      font-weight: 300;
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+      background: linear-gradient(180deg, #ffffff 0%, rgba(255,255,255,0.5) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    h2 {
+      font-family: var(--font-display);
+      font-size: var(--h2-size);
+      font-weight: 300;
+      letter-spacing: 0.02em;
+      margin-bottom: var(--content-gap);
+      background: linear-gradient(180deg, #ffffff 0%, rgba(255,255,255,0.6) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    h3 {
+      font-family: var(--font-display);
+      font-size: var(--h3-size);
+      font-weight: 500;
+      letter-spacing: 0.02em;
+    }
+    p {
+      font-size: var(--body-size);
+      color: var(--text-secondary);
+      line-height: 1.8;
+      max-width: 800px;
+      font-weight: 300;
+    }
+    em { font-style: normal; font-weight: 600; color: var(--text-primary); }
+
+    /* ===== Glass card — more transparent ===== */
+    .glass-card {
+      background: var(--glass-bg);
+      backdrop-filter: blur(40px) saturate(150%);
+      -webkit-backdrop-filter: blur(40px) saturate(150%);
+      border: 1px solid var(--glass-border);
+      border-top: 1px solid var(--glass-highlight);
+      border-radius: var(--radius-card);
+      padding: clamp(1.2rem, 3vw, 2.5rem);
+      box-shadow:
+        0 24px 48px rgba(0, 0, 0, 0.25),
+        inset 0 1px 0 rgba(255,255,255,0.1);
+      transition: transform 0.5s var(--ease-out-expo), box-shadow 0.5s var(--ease-out-expo);
+    }
+    .glass-card:hover {
+      transform: translateY(-4px);
+      box-shadow:
+        0 32px 64px rgba(0, 0, 0, 0.3),
+        inset 0 1px 0 rgba(255,255,255,0.15);
+    }
+
+    /* ===== Animated backgrounds ===== */
+    .bg-glow {
+      background: var(--bg-primary);
+    }
+    .bg-glow::before {
+      content: '';
+      position: absolute; inset: 0;
+      background:
+        radial-gradient(ellipse at 20% 80%, rgba(255,255,255,0.04) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 20%, rgba(255,255,255,0.03) 0%, transparent 50%);
+      animation: glowShift 8s ease-in-out infinite alternate;
+    }
+    @keyframes glowShift {
+      0% { opacity: 0.6; transform: scale(1); }
+      100% { opacity: 1; transform: scale(1.1); }
+    }
+
+    .bg-gradient {
+      background: linear-gradient(135deg, var(--bg-primary) 0%, #111113 100%);
+    }
+
+    /* Animated gradient orbs */
+    .bg-orbs::before,
+    .bg-orbs::after {
+      content: '';
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: 0.06;
+      animation: orbFloat 12s ease-in-out infinite;
+    }
+    .bg-orbs::before {
+      width: 400px; height: 400px;
+      background: radial-gradient(circle, rgba(255,255,255,0.3), transparent);
+      top: -10%; left: -5%;
+    }
+    .bg-orbs::after {
+      width: 300px; height: 300px;
+      background: radial-gradient(circle, rgba(255,255,255,0.2), transparent);
+      bottom: -10%; right: -5%;
+      animation-delay: -6s;
+      animation-direction: reverse;
+    }
+    @keyframes orbFloat {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      33% { transform: translate(30px, -20px) scale(1.1); }
+      66% { transform: translate(-20px, 30px) scale(0.95); }
+    }
+
+    /* ===== Metallic number ===== */
+    .big-number {
+      font-family: var(--font-display);
+      font-size: clamp(4rem, 15vw, 10rem);
+      font-weight: 300;
+      line-height: 1;
+      background: radial-gradient(circle at 30% 30%, #ffffff 0%, var(--accent) 60%, var(--text-secondary) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    /* ===== Monochrome blockquote ===== */
+    blockquote {
+      font-size: var(--h3-size);
+      font-style: normal;
+      font-weight: 300;
+      border-left: 2px solid var(--glass-highlight);
+      padding: 0.5em 1.2em;
+      text-align: left;
+      max-width: 800px;
+      line-height: 1.8;
+      color: var(--text-primary);
+    }
+    .attribution {
+      text-align: right; opacity: 0.4;
+      font-size: var(--small-size); margin-top: 1em;
+      letter-spacing: 0.08em; text-transform: uppercase;
+    }
+
+    .two-cols {
+      display: flex; gap: clamp(1.5rem, 4vw, 4rem);
+      width: 100%; max-width: 1000px;
+    }
+    .two-cols > div { flex: 1; text-align: left; }
+
+    ul { text-align: left; max-width: 800px; list-style: none; }
+    ul li { padding: 0.4em 0; font-weight: 300; color: var(--text-secondary); }
+    ul li::before { content: "—"; color: var(--glass-highlight); margin-right: 0.8em; }
+
+    /* Badge / label */
+    .badge {
+      display: inline-flex; align-items: center;
+      padding: 6px 14px;
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: 999px;
+      font-size: var(--small-size);
+      color: var(--text-secondary);
+      margin-bottom: 1.5rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      font-weight: 400;
+      backdrop-filter: blur(16px);
+    }
+
+    /* ===== Entrance animations — Dramatic + motion ===== */
+    .reveal {
+      opacity: 0;
+      transform: translateY(40px) scale(0.95);
+      transition: opacity var(--duration-normal) var(--ease-out-expo),
+                  transform var(--duration-normal) var(--ease-out-expo);
+    }
+    .slide.visible .reveal { opacity: 1; transform: translateY(0) scale(1); }
+    .reveal:nth-child(1) { transition-delay: 0.1s; }
+    .reveal:nth-child(2) { transition-delay: 0.3s; }
+    .reveal:nth-child(3) { transition-delay: 0.5s; }
+    .reveal:nth-child(4) { transition-delay: 0.7s; }
+
+    .reveal-blur {
+      opacity: 0; filter: blur(12px); transform: scale(0.9);
+      transition: opacity 1.5s var(--ease-out-expo),
+                  filter 1.5s var(--ease-out-expo),
+                  transform 1.5s var(--ease-out-expo);
+    }
+    .slide.visible .reveal-blur { opacity: 1; filter: blur(0); transform: scale(1); }
+
+    .reveal-left {
+      opacity: 0; transform: translateX(-60px);
+      transition: opacity var(--duration-normal) var(--ease-out-expo),
+                  transform var(--duration-normal) var(--ease-out-expo);
+    }
+    .slide.visible .reveal-left { opacity: 1; transform: translateX(0); }
+
+    .reveal-right {
+      opacity: 0; transform: translateX(60px);
+      transition: opacity var(--duration-normal) var(--ease-out-expo),
+                  transform var(--duration-normal) var(--ease-out-expo);
+    }
+    .slide.visible .reveal-right { opacity: 1; transform: translateX(0); }
+
+    /* ===== Floating animation for cards ===== */
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+    .float-slow { animation: float 6s ease-in-out infinite; }
+    .float-mid  { animation: float 5s ease-in-out infinite 1s; }
+
+    /* ===== Pulse ring ===== */
+    .pulse-ring {
+      position: relative;
+    }
+    .pulse-ring::after {
+      content: '';
+      position: absolute;
+      inset: -20px;
+      border-radius: 50%;
+      border: 1px solid rgba(255,255,255,0.1);
+      animation: pulseExpand 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+      pointer-events: none;
+    }
+    @keyframes pulseExpand {
+      0% { transform: scale(0.8); opacity: 1; }
+      100% { transform: scale(1.5); opacity: 0; }
+    }
+
+    /* ===== Shimmer line ===== */
+    .shimmer-line {
+      width: 120px; height: 1px; margin: 1.5em auto;
+      background: linear-gradient(90deg, transparent, var(--glass-highlight), transparent);
+      background-size: 200% 100%;
+      animation: shimmer 3s ease-in-out infinite;
+    }
+    @keyframes shimmer {
+      0% { background-position: -200% 0; }
+      100% { background-position: 200% 0; }
+    }
+
+    /* ===== Progress ===== */
+    .progress-bar {
+      position: fixed; top: 0; left: 0; height: 2px;
+      background: linear-gradient(90deg, transparent, var(--glass-highlight), var(--accent), var(--glass-highlight), transparent);
+      background-size: 200% 100%;
+      width: 0%; z-index: 1000;
+      transition: width 0.4s var(--ease-out-expo);
+      animation: shimmer 4s ease-in-out infinite;
+    }
+
+    .preview-badge {
+      position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%);
+      background: var(--glass-bg); color: var(--text-secondary);
+      border: 1px solid var(--glass-border);
+      padding: 0.4rem 1.2rem; border-radius: 2rem;
+      font-size: var(--small-size); font-weight: 400; z-index: 1000;
+      opacity: 0.7; pointer-events: none;
+      backdrop-filter: blur(16px);
+      letter-spacing: 0.08em;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.2s !important; }
+      html { scroll-behavior: auto; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="progress-bar"></div>
+  <div class="preview-badge">Glass Monolith v2 · 风格预览</div>
+
+  <!-- Slide 1: Cover -->
+  <section class="slide bg-gradient bg-orbs">
+    <div class="slide-content">
+      <div class="badge reveal">Style Preview</div>
+      <h1 class="reveal" style="margin-bottom: 0.5em;">通用 Agent 范式<br>谁相信，谁质疑</h1>
+      <div class="shimmer-line reveal"></div>
+      <p class="reveal">AI 行业的终极辩论——模型 + Agent + 工具</p>
+    </div>
+  </section>
+
+  <!-- Slide 2: Stat -->
+  <section class="slide bg-glow bg-orbs">
+    <div class="slide-content">
+      <div class="big-number reveal-blur pulse-ring">72.7%</div>
+      <p class="reveal" style="font-size: var(--h3-size); margin-top: 0.5em;">复合年增长率</p>
+      <p class="reveal" style="font-size: var(--small-size); opacity: 0.4; margin-top: 0.3em;">IDC 中国 AI Agent 市场预测 2025-2028</p>
+    </div>
+  </section>
+
+  <!-- Slide 3: Content list in glass card -->
+  <section class="slide bg-orbs">
+    <div class="slide-content" style="align-items: center;">
+      <h2 class="reveal" style="margin-bottom: 1.2em;">正在形成的共识</h2>
+      <div class="glass-card reveal float-slow" style="width: 100%; max-width: 800px; text-align: left;">
+        <ul>
+          <li class="reveal">通用编排者 + 专业化工人架构</li>
+          <li class="reveal"><em>上下文工程</em>质量决定 Agent 成败</li>
+          <li class="reveal">通用 Agent 已能处理 95% 的专业任务</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- Slide 4: Quote -->
+  <section class="slide bg-glow bg-orbs">
+    <div class="slide-content">
+      <blockquote class="reveal-left">"不存在通用智能这种东西。<br>这个概念完全没有意义。"</blockquote>
+      <div class="shimmer-line reveal"></div>
+      <p class="attribution reveal">— Yann LeCun, Meta</p>
+    </div>
+  </section>
+
+  <!-- Slide 5: Two-Column in glass cards -->
+  <section class="slide bg-orbs">
+    <div class="slide-content">
+      <h2 class="reveal" style="margin-bottom: 1.5em;">通用 vs. 专业化</h2>
+      <div class="two-cols">
+        <div class="glass-card reveal-left float-slow">
+          <h3 style="color: var(--text-primary); margin-bottom: 0.8em;">通用 Agent 派</h3>
+          <ul>
+            <li>Anthropic</li>
+            <li>Microsoft</li>
+            <li>Simon Willison</li>
+          </ul>
+        </div>
+        <div class="glass-card reveal-right float-mid">
+          <h3 style="color: var(--text-secondary); margin-bottom: 0.8em;">专业化怀疑派</h3>
+          <ul>
+            <li>Yann LeCun</li>
+            <li>Petr Baudis</li>
+            <li>IBM Research</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    const slides = document.querySelectorAll('.slide');
+    let current = 0;
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          current = Array.from(slides).indexOf(entry.target);
+          document.querySelector('.progress-bar').style.width =
+            ((current + 1) / slides.length * 100) + '%';
+        }
+      });
+    }, { threshold: 0.5 });
+    slides.forEach(s => observer.observe(s));
+
+    let lastScroll = 0;
+    const go = (dir) => {
+      current = Math.max(0, Math.min(slides.length - 1, current + dir));
+      slides[current].scrollIntoView({ behavior: 'smooth' });
+    };
+    document.addEventListener('keydown', (e) => {
+      if (['ArrowRight', ' ', 'PageDown'].includes(e.key)) { e.preventDefault(); go(1); }
+      if (['ArrowLeft', 'PageUp'].includes(e.key)) { e.preventDefault(); go(-1); }
+    });
+    document.addEventListener('wheel', (e) => {
+      e.preventDefault();
+      const now = Date.now();
+      if (now - lastScroll < 800) return;
+      lastScroll = now;
+      go(e.deltaY > 0 ? 1 : -1);
+    }, { passive: false });
+  </script>
+</body>
+</html>

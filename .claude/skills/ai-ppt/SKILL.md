@@ -160,7 +160,7 @@ Pass the content inventory from Phase 1 to the style sub-skill. It will:
 
 Pass to the Reveal.js sub-skill:
 - The content inventory (Phase 1), including image inventory
-- The chosen style preset with CSS variables, fonts, layout signature (Phase 2)
+- The chosen style preset with CSS variables, fonts, layout signature, and signature CSS blocks if custom style (Phase 2)
 - The animation mood (Phase 2)
 - The confirmed slide sequence (Phase 2)
 
@@ -192,6 +192,7 @@ Before delivering the final output, verify every item:
 - [ ] Animations match the mood
 - [ ] Color contrast is sufficient for readability
 - [ ] Design feels distinctive, not generic
+- [ ] Signature CSS techniques from custom reference are faithfully applied (if custom style)
 
 ### Images
 - [ ] All kept images are properly sized and positioned for slide scale (not overflowing, not tiny)

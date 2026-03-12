@@ -122,6 +122,63 @@ Note the whitespace style:
 
 ---
 
+### Step 6: Signature CSS Extraction
+
+**Purpose**: Capture 3-5 actual CSS code blocks that define the design's visual personality — things that cannot be reduced to variables (multi-layer gradients, text effects, glassmorphism, decorative pseudo-elements, animation keyframes).
+
+**5 Extraction Categories:**
+
+| Category | What to Look For | Example |
+|----------|-----------------|---------|
+| **Background Composition** | Multi-layer gradients, grid/dot patterns, noise textures | `radial-gradient(circle at 0% 0%, ...) + linear-gradient(135deg, ...)` |
+| **Text Effects** | `background-clip: text`, `text-shadow`, outline text | `.gradient-text { background: linear-gradient(...); -webkit-background-clip: text; }` |
+| **Container Effects** | Glassmorphism, dual box-shadow, inset glow, border-top highlights | `.glass-card { backdrop-filter: blur(40px); border-top: 1px solid rgba(255,255,255,0.2); }` |
+| **Decorative Elements** | Positioned blur circles, accent lines, scanline overlays | `.bg-orb { position: absolute; border-radius: 50%; filter: blur(80px); }` |
+| **Animation Keyframes** | `@keyframes`, custom transition parameters | `@keyframes float { 0%,100% { transform: translateY(0) } 50% { transform: translateY(-8px) } }` |
+
+**Per-input-type extraction:**
+
+- **HTML/CSS**: Extract verbatim CSS rule blocks. Remap source custom property names (e.g., `--primary-neon`) to standardized names (`--accent`). Max 5 techniques.
+- **Screenshot**: Visually identify technique categories present, then synthesize CSS using closest preset preview as template. Use the mapping table below.
+- **Text description**: Map descriptive keywords to technique combinations (e.g., "glowing/neon" → text-shadow glow + grid bg from Neon Cyber).
+
+**Screenshot → CSS Synthesis Mapping:**
+
+| Visual Feature | Template Source | CSS Pattern |
+|----------------|----------------|-------------|
+| Grid/dot pattern background | `09-neon-cyber.html` `.bg-grid` | `background-image: linear-gradient(...)` |
+| Blurred color circles | `04-dark-botanical.html` `.botanical-deco` | `position: absolute; border-radius: 50%; filter: blur(80px)` |
+| Glowing text | `09-neon-cyber.html` `.neon-glow` | `text-shadow: 0 0 Npx var(--accent)` |
+| Terminal window frame | `10-terminal-green.html` `.terminal-window` | Compound component |
+| Glassmorphism card | Synthesize | `backdrop-filter: blur(); background: rgba(); border: 1px solid rgba()` |
+| Neon-bordered card | `09-neon-cyber.html` `.neon-card` | `border + box-shadow + inset box-shadow` |
+| Halftone dots | `03-creative-voltage.html` `.halftone-bg` | `radial-gradient(circle,...) background-size: 8px` |
+| Scanline overlay | `10-terminal-green.html` `.scanlines::after` | `repeating-linear-gradient` pseudo |
+| Paper card on dark bg | `05-notebook-tabs.html` `.page-card` | Card container with shadow |
+
+**Output format**: List each extracted technique with its category label and CSS block. Example:
+
+```
+**Signature CSS** (3 techniques):
+
+1. **Background Composition** — Radial gradient stacking
+   ```css
+   .slide { background: radial-gradient(circle at 20% 80%, rgba(0,212,255,0.15), transparent 50%), linear-gradient(135deg, #0a1628, #1a2a4a); }
+   ```
+
+2. **Container Effects** — Glassmorphism card
+   ```css
+   .glass-card { backdrop-filter: blur(40px) saturate(1.8); background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-top: 1px solid rgba(255,255,255,0.2); box-shadow: 0 8px 32px rgba(0,0,0,0.3); border-radius: 16px; }
+   ```
+
+3. **Animation Keyframes** — Floating motion
+   ```css
+   @keyframes float { 0%,100% { transform: translateY(0) } 50% { transform: translateY(-8px) } }
+   ```
+```
+
+---
+
 ## Output: Complete Custom Preset
 
 Assemble all extracted elements into a complete preset:
@@ -152,13 +209,20 @@ Assemble all extracted elements into a complete preset:
 **Layout Signature**: [Pattern description]
 
 **Animation Mood**: [Mood name] — [Duration range], [easing]
+
+**Signature CSS** ([N] techniques):
+1. **[Category]** — [Brief label]
+   \`\`\`css
+   [Extracted CSS block]
+   \`\`\`
+2. ...
 ```
 
 ---
 
-## Step 6: Generate Style Preview HTML
+## Step 7: Generate Style Preview HTML
 
-**After extracting the custom preset, ALWAYS generate a live preview HTML file** so the user can see the style applied to sample slides before committing to it.
+**After extracting the custom preset (including Signature CSS), ALWAYS generate a live preview HTML file** so the user can see the style applied to sample slides before committing to it.
 
 Write the preview to: `[project-dir]/style-preview.html`
 
@@ -229,11 +293,12 @@ The preview is a **self-contained single HTML file** with 5 representative sampl
     }
     .slide-content.left-align { align-items: flex-start; text-align: left; }
 
-    h1 { font-family: var(--font-display); font-size: var(--title-size); font-weight: 700; letter-spacing: 0.08em; line-height: 1.3; }
-    h2 { font-family: var(--font-display); font-size: var(--h2-size); font-weight: 700; letter-spacing: 0.08em; margin-bottom: var(--content-gap); }
-    h3 { font-family: var(--font-display); font-size: var(--h3-size); font-weight: 700; }
+    /* NOTE: font-weight and em color should use extracted values from source */
+    h1 { font-family: var(--font-display); font-size: var(--title-size); font-weight: [extracted or 700]; letter-spacing: 0.08em; line-height: 1.3; }
+    h2 { font-family: var(--font-display); font-size: var(--h2-size); font-weight: [extracted or 700]; letter-spacing: 0.08em; margin-bottom: var(--content-gap); }
+    h3 { font-family: var(--font-display); font-size: var(--h3-size); font-weight: [extracted or 700]; }
     p  { font-size: var(--body-size); color: var(--text-secondary); line-height: 1.8; max-width: 800px; }
-    em { font-style: normal; font-weight: 700; color: var(--accent); }
+    em { font-style: normal; font-weight: 700; color: var(--accent); /* only if accent is saturated; otherwise use --text-primary */ }
 
     .reveal {
       opacity: 0; transform: translateY(30px);
@@ -248,7 +313,7 @@ The preview is a **self-contained single HTML file** with 5 representative sampl
 
     .big-number {
       font-family: var(--font-display); font-size: clamp(4rem, 15vw, 10rem);
-      font-weight: 900; color: var(--accent); line-height: 1;
+      font-weight: [extracted or 900]; color: var(--accent); line-height: 1;
     }
 
     blockquote {
@@ -265,11 +330,20 @@ The preview is a **self-contained single HTML file** with 5 representative sampl
     ul li { padding: 0.3em 0; }
     ul li::before { content: "—"; color: var(--accent); margin-right: 0.5em; }
 
-    /* ===== Layout Signature Decorations ===== */
-    /* [Insert extracted layout-specific CSS here: card styles, split panels, decorative shapes, etc.] */
+    /* ===== INJECTION: Background Composition ===== */
+    /* Insert extracted multi-layer gradients, grid/dot patterns, noise textures */
 
-    /* ===== Animation Mood Overrides ===== */
-    /* [Insert mood-specific animation CSS from animation-patterns.md] */
+    /* ===== INJECTION: Text Effects ===== */
+    /* Insert extracted background-clip:text, text-shadow glows, outline text */
+
+    /* ===== INJECTION: Container Effects ===== */
+    /* Insert extracted glassmorphism, dual box-shadow, border-top highlights */
+
+    /* ===== INJECTION: Decorative Elements ===== */
+    /* Insert extracted positioned blur circles, accent lines, overlays */
+
+    /* ===== INJECTION: Animation Keyframes ===== */
+    /* Insert extracted @keyframes and custom transition parameters */
 
     .progress-bar {
       position: fixed; top: 0; left: 0; height: 4px;
@@ -396,38 +470,26 @@ The preview is a **self-contained single HTML file** with 5 representative sampl
 
 ### What to Customize in the Preview
 
-When generating the preview, replace the template placeholders with the extracted values:
+Replace all template placeholders with extracted values from Steps 1-6:
+- `[Custom Preset Name]` → name from the preset output
+- `[EXTRACTED_GOOGLE_FONTS_URL]` → Google Fonts link from Step 2
+- All `[extracted]` CSS values → from Steps 1-2 (colors, fonts, weights)
+- `[extracted animation duration]` → from Step 4
+- **5 injection zones** → filled with Signature CSS blocks from Step 6
 
-| Placeholder | Source |
-|------------|--------|
-| `[Custom Preset Name]` | The name from Step 5 output |
-| `[EXTRACTED_GOOGLE_FONTS_URL]` | The Google Fonts link from Step 2 |
-| All `[extracted]` CSS variable values | The color palette from Step 1 |
-| `[Display Font]` / `[Body Font]` | Typography from Step 2 |
-| Layout signature CSS comment block | Layout-specific decorations from Step 3 |
-| Animation mood CSS comment block | Mood-specific overrides from Step 4 |
-| `[extracted animation duration]` | Duration from Step 4 |
+### Technique-to-Slide Mapping
 
-### Layout Signature Application
+Each preview slide should demonstrate specific Signature CSS categories:
 
-Apply the extracted layout signature to the preview slides. Examples:
+| Preview Slide | Demonstrates | How |
+|--------------|-------------|-----|
+| Slide 1 (Cover) | Background Composition + Decorative Elements | Multi-layer bg on `<section>`, blur orbs as child `<div>`s |
+| Slide 2 (Stat) | Text Effects | Apply gradient-text or text-shadow to `.big-number` |
+| Slide 3 (Content) | Container Effects | Wrap list in a glass/neon card `<div>` |
+| Slide 4 (Quote) | Decorative Elements | Accent line or glow on `<blockquote>` |
+| Slide 5 (Two-column) | Container Effects | Card wrapper on each column `<div>` |
 
-- **Card-based**: Wrap `.slide-content` children in a card div with `background: var(--bg-secondary); border-radius: 12px; padding: 2rem; box-shadow: ...`
-- **Split-panel**: Use CSS grid on `.slide` with two color zones
-- **Full-bleed**: Reduce padding, add gradient backgrounds that extend to edges
-- **Terminal**: Add scanline overlay, monospace body font, cursor blink animation
-- **Editorial**: Add pull-quote styling, drop caps on first paragraph
-
-### Animation Mood Application
-
-Apply the extracted animation mood to override the default reveal animations:
-
-- **Dramatic**: Increase `--duration-normal` to `1.2s`, add `scale(0.95)` to initial state
-- **Techy**: Add glow `text-shadow` to headings, grid background pattern
-- **Playful**: Use `var(--ease-out-back)` easing, add `scale(0.8)` bounce
-- **Professional**: Reduce `--duration-normal` to `0.25s`, minimal transform
-- **Calm**: Set `--duration-normal` to `1s`, ease-in-out timing
-- **Editorial**: Add staggered delays with shorter intervals
+Layout signature and animation mood are now expressed through the injection zones rather than as separate override steps. Card-based layouts go in Container Effects; grid/scanline patterns go in Background Composition; custom `@keyframes` and easing go in Animation Keyframes.
 
 ---
 
@@ -447,18 +509,6 @@ If the user requests adjustments to the custom style:
 
 ---
 
-## Variant.com Integration Tips
+## Variant.com Integration
 
-When the user references [variant.com](https://variant.com/) or its community gallery:
-
-1. **Ask for a screenshot** — variant.com blocks programmatic access, so screenshots are the best way to capture designs
-2. **Ask user to export HTML** — Variant supports HTML export; the exported code contains extractable CSS
-3. **Style Dropper context** — If the user describes a Variant design verbally (e.g., "brutalist dark theme with dot-matrix grid"), use the Google Fonts matching table above to find the closest fonts and build a preset from the description
-
-Variant.com community designs tend to feature:
-- High visual density with distinctive typography
-- Unconventional color palettes (neon on dark, muted earth tones, acid colors)
-- Strong layout personalities (brutalist grids, terminal aesthetics, magazine layouts)
-- Bold use of whitespace or deliberate lack thereof
-
-These characteristics map well to the **Techy**, **Editorial**, and **Dramatic** animation moods.
+Variant.com blocks programmatic access — ask for a **screenshot** or **HTML export** (Variant supports it). For verbal descriptions (e.g., "brutalist dark theme with dot-matrix grid"), use the Google Fonts matching table in Step 2 and the Screenshot → CSS Synthesis Mapping in Step 6 to build a preset. Variant designs tend toward high density, unconventional palettes, and strong layout personalities — map to **Techy**, **Editorial**, or **Dramatic** moods.
